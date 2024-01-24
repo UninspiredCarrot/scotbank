@@ -1,20 +1,24 @@
 package uk.co.asepstrath.bank;
 
 public class Account {
-    private int balancce;
+    private int balance;
+
     public Account() {
-        balancce = 0;
+        balance = 0;
     }
+
     public void deposit(int amount) {
-        balancce = balancce + amount;
+        balance = balance + amount;
+    }
+
+    public void withdraw(int amount) throws ArithmeticException{
+        if(balance - amount < 0) {
+            throw new ArithmeticException("Not enough funds available.");
+        }
+        balance = balance - amount;
     }
 
     public int getBalance() {
-        return balancce;
+        return balance;
     }
-
-    public void withdraw(int amount) {
-        balancce = balancce - amount;
-    }
-
 }
