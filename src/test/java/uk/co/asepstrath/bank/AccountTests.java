@@ -8,8 +8,23 @@ public class AccountTests {
     @Test
     public void createAccount(){
         Account a = new Account();
-        Assertions.assertTrue(a != null);
+        Assertions.assertNotNull(a);
+    }
+    @Test
+    public void AccountDeposit(){
+        Account a = new Account();
+        a.deposit(20);
+        Assertions.assertTrue(a.getBalance() == 20);
+        a.deposit(50);
+        Assertions.assertTrue(a.getBalance() == 70);
     }
 
-
+    @Test
+    public void AccountWithdraw(){
+        Account a = new Account();
+        a.deposit(20);
+        Assertions.assertTrue(a.getBalance() == 20);
+        a.withdraw(20);
+        Assertions.assertTrue(a.getBalance() == 0);
+    }
 }
