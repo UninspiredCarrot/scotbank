@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -65,6 +66,31 @@ public class App extends Jooby {
             Statement stmt = connection.createStatement();
             stmt.executeUpdate("CREATE TABLE `Example` (`Key` varchar(255),`Value` varchar(255))");
             stmt.executeUpdate("INSERT INTO Example " + "VALUES ('WelcomeMessage', 'Welcome to A Bank')");
+
+            //Testing transaction table plus data insertion
+            stmt.executeUpdate(
+                    "CREATE TABLE IF NOT EXISTS`transactions` (" +
+                    "id integer PRIMARY KEY,"+
+                    "`balance_before` decimal NOT NULL," +
+                    "`balance_after` decimal NOT NULL,"+
+                    "`transaction_amount` decimal NOT NULL,"+
+                    "`transaction_type` varchar(255) NOT NULL"+
+                    ")"
+                );
+            String sql = (
+                    "INSERT INTO transactions (" +
+                    "ID, balance_before, balance_after, transaction_amount, transaction_type" +
+                    ")"+
+                    "VALUES (?,?,?,?,?)"
+            );
+            PreparedStatement prep = connection.prepareStatement(sql);
+            prep.setInt(1, 1);
+            prep.setDouble(2, 100);
+            prep.setDouble(3, 150);
+            prep.setDouble(4, 50);
+            prep.setString(5, "Deposit");
+            prep.executeUpdate();
+
         } catch (SQLException e) {
             log.error("Database Creation Error",e);
         }
