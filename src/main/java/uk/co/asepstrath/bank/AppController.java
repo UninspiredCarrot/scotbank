@@ -38,4 +38,15 @@ public class AppController {
 
         return new ModelAndView("overview.hbs", model);
     }
+
+    @GET("/view_transaction")
+    public ModelAndView view_transaction(@QueryParam int transaction_id){
+        Map<String, Object> model = new HashMap<>();
+
+        // Get transaction {transaction_id}
+
+        // Object should be created here and the information should be passed to a transaction view
+
+        return new ModelAndView("view_transaction.hbs", model);
+    }
 }
