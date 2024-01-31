@@ -8,8 +8,8 @@ public class Account {
     private double balance = 0.0;
     private String name;
 
-    public Account (double amount) {
-        balance = amount;
+    public Account () {
+        balance = 0;
     }
 
     public String getName() {
@@ -24,16 +24,17 @@ public class Account {
         balance = round();
     }
 
-    public double getBalance() {
-        return balance;
+    public void withdraw(double amount) throws ArithmeticException {
+        if(balance - amount < 0) {
+            throw new ArithmeticException("Insufficient Funds");
+        }
+
+        balance = balance - amount;
+        balance = round();
     }
 
-    public void withdraw(double amount) {
-
-        if (amount > balance) throw new ArithmeticException();
-
-        balance -= amount;
-        balance = round();
+    public double getBalance() {
+        return balance;
     }
 
     public double round() {

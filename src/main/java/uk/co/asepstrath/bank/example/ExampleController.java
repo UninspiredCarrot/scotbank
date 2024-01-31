@@ -109,7 +109,6 @@ public class ExampleController {
         model.put("name", name);
 
         return new ModelAndView("dice.hbs", model);
-
     }
 
     /*
