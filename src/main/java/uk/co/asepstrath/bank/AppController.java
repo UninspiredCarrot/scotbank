@@ -49,6 +49,7 @@ public class AppController {
             Statement stmt = this.dataSource.getConnection().createStatement();
 
             String sql = "SELECT * FROM transactions WHERE id = " + transaction_id;
+
             ResultSet rs = stmt.executeQuery(sql);
 
             while(rs.next()){
@@ -59,10 +60,13 @@ public class AppController {
                 rs.getString("transaction_type")
                 );
             }
-
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+
+            logger.error("Database Error Occurred",e);
+
+            throw new StatusCodeException(StatusCode.SERVER_ERROR, "Database Error Occurred");
         }
+
         // Object should be created here and the information should be passed to a transaction view
         model.put("ID", transaction_id);
         model.put("balance_after", tran.getBalance_after());

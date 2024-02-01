@@ -2,19 +2,47 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
-        <title>Overview Page</title>
+        <title>Scotbank - my transaction</title>
     </head>
     <body>
-        <h1>Transaction Breakdown</h1>
-        <div>
-            <h2>Transaction ID: {{ID}}</h2>
-            <h2>Transaction Type: {{transaction_type}}</h2>
-            <h2>Balance Before: {{balance_before}}</h2>
-            <h2>Balance After: {{balance_after}}</h2>
-            <h2>Transaction amount: {{transaction_amount}}</h2>
-        </div>
-        <div>
-            
-        </div>
+      <h1>Scot Bank</h1>
+      <form id='demoForm' style="width:auto">
+        <fieldset>
+          <legend>Transaction Breakdown</legend>
+          <table id='regDetails'>
+
+<!---------------------------------------------------------------------------------->
+<!--
+              The id will be hidden!
+              shown now for proof of concept
+
+              The form should be updated when the final transaction object is created
+-->
+            <tr>
+              <td><label for='id'>Transaction ID</label></td>
+              <td><p id='id'>{{ID}}</p></td>
+            </tr>
+<!---------------------------------------------------------------------------------->
+
+            <tr>
+              <td><label for='transaction_type'>Transaction Type:</label></td>
+              <td><p id='transaction_type'>{{transaction_type}}</p></td>
+            </tr>
+            <tr>
+              <td><label for='balance_before'>Balance Before:</label></td>
+              <td><p id='balance_before'>£{{balance_before}}</p></td>
+            </tr>
+            <tr>
+              <td><label for='balance_after'>Balance Before:</label></td>
+              <td><p id='balance_after'>£{{balance_after}}</p></td>
+            </tr>
+            <tr>
+              <td><label for='transaction_amount'>Transaction Amount:</label></td>
+              <td><p  id='transaction_amount'>£{{transaction_amount}}</p></td>
+            </tr>
+          </table>
+        </fieldset>
+        </form>
     </body>
 </html>
+
