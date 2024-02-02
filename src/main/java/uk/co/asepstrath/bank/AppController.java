@@ -52,14 +52,14 @@ public class AppController {
 
             ResultSet rs = stmt.executeQuery(sql);
 
-            while(rs.next()){
-                tran = new Transaction(
-                rs.getDouble("balance_before"),
-                rs.getDouble("balance_after"),
-                rs.getDouble("transaction_amount"),
-                rs.getString("transaction_type")
-                );
-            }
+            rs.next();
+            tran = new Transaction(
+            rs.getDouble("balance_before"),
+            rs.getDouble("balance_after"),
+            rs.getDouble("transaction_amount"),
+            rs.getString("transaction_type")
+            );
+
         } catch (SQLException e) {
 
             logger.error("Database Error Occurred",e);
