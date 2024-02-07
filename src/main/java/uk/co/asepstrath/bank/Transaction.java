@@ -1,56 +1,51 @@
 package uk.co.asepstrath.bank;
 
 public class Transaction {
-    private double balance_before,
-                   transaction_amount,
-                   balance_after;
-    private String transaction_type;
+    private double amount;
+    private String  id,
+                    to,
+                    transaction_type;
 
-    public Transaction(double balance_before, double transaction_amount, String transaction_type){
-        this.balance_before = balance_before;
-        this.transaction_amount = transaction_amount;
-        this.balance_after = balance_before - transaction_amount;
+    public Transaction() {
+    }
+
+    public Transaction(double amount, String id, String to, String transaction_type) {
+        this.amount = amount;
+        this.id = id;
+        this.to = to;
         this.transaction_type = transaction_type;
     }
 
-    public Transaction(double balance_before, double balance_after, double transaction_amount, String transaction_type){
-        this.balance_before = balance_before;
-        this.transaction_amount = transaction_amount;
-        this.balance_after = balance_after;
-        this.transaction_type = transaction_type;
+    public double getAmount() {
+        return amount;
     }
 
-    public Transaction(){}
-
-    public double getBalance_before() {
-        return balance_before;
+    public String getId() {
+        return id;
     }
 
-    public void setBalance_before(double balance_before) {
-        this.balance_before = balance_before;
-    }
-
-    public double getTransaction_amount() {
-        return transaction_amount;
-    }
-
-    public void setTransaction_amount(double transaction_amount) {
-        this.transaction_amount = transaction_amount;
-    }
-
-    public double getBalance_after() {
-        return balance_after;
-    }
-
-    public void setBalance_after(double balance_after) {
-        this.balance_after = balance_after;
+    public String getTo() {
+        return to;
     }
 
     public String getTransaction_type() {
         return transaction_type;
     }
 
+    public void setAmount(double amount) {
+        this.amount = amount;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setTo(String to) {
+        this.to = to;
+    }
+
     public void setTransaction_type(String transaction_type) {
         this.transaction_type = transaction_type;
     }
+
 }

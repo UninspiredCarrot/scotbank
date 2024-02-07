@@ -73,25 +73,23 @@ public class App extends Jooby {
             //---------------Testing transaction table plus data insertion--------------------------
             stmt.executeUpdate(
                     "CREATE TABLE IF NOT EXISTS`transactions` (" +
-                    "id integer PRIMARY KEY,"+
-                    "`balance_before` decimal NOT NULL," +
-                    "`balance_after` decimal NOT NULL,"+
-                    "`transaction_amount` decimal NOT NULL,"+
-                    "`transaction_type` varchar(255) NOT NULL"+
+                    "id VARCHAR(255) PRIMARY KEY,"+
+                    "`to` VARCHAR(255) NOT NULL," +
+                    "amount DECIMAL NOT NULL,"+
+                    "transaction_type VARCHAR(255) NOT NULL"+
                     ")"
                 );
             String sql = (
                     "INSERT INTO transactions (" +
-                    "ID, balance_before, balance_after, transaction_amount, transaction_type" +
+                    "id, `to`, amount, transaction_type" +
                     ")"+
-                    "VALUES (?,?,?,?,?)"
+                    "VALUES (?,?,?,?)"
             );
             PreparedStatement prep = connection.prepareStatement(sql);
-            prep.setInt(1, 1);
-            prep.setDouble(2, 100);
-            prep.setDouble(3, 150);
-            prep.setDouble(4, 50);
-            prep.setString(5, "Deposit");
+            prep.setString(1, "test_id");
+            prep.setString(2, "test_id_to");
+            prep.setDouble(3, 50);
+            prep.setString(4, "Deposit");
             prep.executeUpdate();
             //---------------------------------------------------------------------------------------
 
@@ -122,11 +120,11 @@ public class App extends Jooby {
                 prep.setDouble(3, account.getBalance());
                 prep.setBoolean(4, account.isRoundUpEnabled());
                 prep.executeUpdate();
-                log.info(
-                        String.format(
-                                "{%s} - added to database", account
-                        )
-                );
+//                log.info(
+//                        String.format(
+//                                "{%s} - added to database", account
+//                        )
+//                );
             }
             //---------------------------------------------------------------------------------------
         } catch (SQLException e) {

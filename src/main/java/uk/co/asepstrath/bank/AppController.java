@@ -66,7 +66,7 @@ public class AppController {
     }
 
     @GET("/view_transaction")
-    public ModelAndView view_transaction(@QueryParam int transaction_id){
+    public ModelAndView view_transaction(@QueryParam String transaction_id){
 
         Map<String, Object> model = new HashMap<>();
         Transaction tran = new Transaction();
@@ -80,10 +80,10 @@ public class AppController {
 
             rs.next();
             tran = new Transaction(
-            rs.getDouble("balance_before"),
-            rs.getDouble("balance_after"),
-            rs.getDouble("transaction_amount"),
-            rs.getString("transaction_type")
+                rs.getDouble("amount"),
+                rs.getString("id"),
+                rs.getString("to"),
+                rs.getString("transaction_type")
             );
 
         } catch (SQLException e) {
@@ -94,10 +94,9 @@ public class AppController {
         }
 
         // Object should be created here and the information should be passed to a transaction view
-        model.put("ID", transaction_id);
-        model.put("balance_after", tran.getBalance_after());
-        model.put("balance_before", tran.getBalance_before());
-        model.put("transaction_amount", tran.getTransaction_amount());
+        model.put("ID", tran.getId());
+        model.put("amount", tran.getAmount());
+        model.put("to", tran.getTo());
         model.put("transaction_type", tran.getTransaction_type());
 
         return new ModelAndView("view_transaction.hbs", model);
