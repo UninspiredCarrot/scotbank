@@ -4,9 +4,9 @@ public class User {
     private String name,password;
     private ArrayList<String> ids;
     public User () {
-        ArrayList<String> ids = new ArrayList<String>();
-        name = "";
-        password = "";
+        this.ids = new ArrayList<>();
+        this.name = "";
+        this.password = "";
     }
 
     public void addId(String id){
@@ -16,17 +16,28 @@ public class User {
         ids.remove(id);
     }
 
+    public int idsLength() {
+        return ids.size();
+    }
+
+    public ArrayList<String> getIds(){
+        ArrayList<String> output = new ArrayList<String>();
+        for(int i = 0; i < ids.size();i++){
+            output.add(ids.get(i));
+        }
+        return output;
+    }
     public String getName(){
         return name;
     }
-    public void SetName(String input){
+    public void setName(String input){
         name = input;
     }
 
     public String getPassword(){
         return password;
     }
-    public void SetPassword(String input){
+    public void setPassword(String input){
         password = input;
     }
 }
