@@ -10,8 +10,8 @@ public class Account {
     private double startingBalance;
     private boolean roundUpEnabled;
 
-    public Account () {
-        startingBalance = 0;
+    public Account (double amount) {
+        startingBalance = amount;
     }
 
     public String getId() {
