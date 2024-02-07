@@ -80,6 +80,7 @@ public class AppController {
 
             rs.next();
             tran = new Transaction(
+                rs.getString("timestamp"),
                 rs.getDouble("amount"),
                 rs.getString("id"),
                 rs.getString("to"),
@@ -96,6 +97,7 @@ public class AppController {
         // Object should be created here and the information should be passed to a transaction view
         model.put("ID", tran.getId());
         model.put("amount", tran.getAmount());
+        model.put("timestamp", tran.getTimestamp());
         model.put("to", tran.getTo());
         model.put("transaction_type", tran.getTransaction_type());
 
