@@ -25,17 +25,24 @@
 <!---------------------------------------------------------------------------------->
 
             <tr>
+              <td><label for='timestamp'>Timestamp:</label></td>
+              <td><p id='timestamp'>{{timestamp}}</p></td>
+            </tr>
+            <tr>
               <td><label for='transaction_type'>Transaction Type:</label></td>
               <td><p id='transaction_type'>{{transaction_type}}</p></td>
             </tr>
+
             <tr>
-              <td><label for='balance_before'>Sent To:</label></td>
-              <td><p id='balance_before'>{{to}}</p></td>
+              <td><label for='to'>Sent To:</label></td>
+              <td><p id='to'>{{to}}</p></td>
             </tr>
+
             <tr>
               <td><label for='transaction_amount'>Transaction Amount:</label></td>
               <td><p  id='transaction_amount'>£{{amount}}</p></td>
             </tr>
+
           </table>
         </fieldset>
         </form>
