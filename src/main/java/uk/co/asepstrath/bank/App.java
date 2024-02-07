@@ -122,11 +122,11 @@ public class App extends Jooby {
                 prep.setDouble(3, account.getBalance());
                 prep.setBoolean(4, account.isRoundUpEnabled());
                 prep.executeUpdate();
-                log.info(
-                        String.format(
-                                "{%s} - added to database", account
-                        )
-                );
+//                log.info(
+//                        String.format(
+//                                "{%s} - added to database", account
+//                        )
+//                );
             }
             //---------------------------------------------------------------------------------------
         } catch (SQLException e) {
