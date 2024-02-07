@@ -1,5 +1,7 @@
 package uk.co.asepstrath.bank;
 
+import kong.unirest.core.HttpResponse;
+import kong.unirest.core.Unirest;
 import uk.co.asepstrath.bank.example.ExampleController;
 import io.jooby.Jooby;
 import io.jooby.handlebars.HandlebarsModule;
@@ -68,7 +70,7 @@ public class App extends Jooby {
             stmt.executeUpdate("CREATE TABLE `Example` (`Key` varchar(255),`Value` varchar(255))");
             stmt.executeUpdate("INSERT INTO Example " + "VALUES ('WelcomeMessage', 'Welcome to A Bank')");
 
-            //Testing transaction table plus data insertion
+            //---------------Testing transaction table plus data insertion--------------------------
             stmt.executeUpdate(
                     "CREATE TABLE IF NOT EXISTS`transactions` (" +
                     "id integer PRIMARY KEY,"+
@@ -91,7 +93,42 @@ public class App extends Jooby {
             prep.setDouble(4, 50);
             prep.setString(5, "Deposit");
             prep.executeUpdate();
+            //---------------------------------------------------------------------------------------
 
+            //------------get user information from api and save to a users table-----------------
+            sql = (
+                    "CREATE TABLE IF NOT EXISTS `accounts` (" +
+                    "id VARCHAR(255) PRIMARY KEY," +
+                    "name VARCHAR(255) NOT NULL," +
+                    "balance DECIMAL NOT NULL," +
+                    "round_up_enabled BIT NOT NULL)"
+                    );
+            stmt.executeUpdate(sql);
+
+            HttpResponse<Account[]> accountResponse =
+                    Unirest
+                    .get("https://api.asep-strath.co.uk/api/accounts")
+                    .asObject(Account[].class);
+
+            for(Account account : accountResponse.getBody()){
+                sql = (
+                    "INSERT INTO accounts (" +
+                    "id, name, balance, round_up_enabled" +
+                    ")VALUES (?,?,?,?);"
+                );
+                prep = connection.prepareStatement(sql);
+                prep.setString(1, account.getId());
+                prep.setString(2, account.getName());
+                prep.setDouble(3, account.getBalance());
+                prep.setBoolean(4, account.isRoundUpEnabled());
+                prep.executeUpdate();
+                log.info(
+                        String.format(
+                                "{%s} - added to database", account
+                        )
+                );
+            }
+            //---------------------------------------------------------------------------------------
         } catch (SQLException e) {
             log.error("Database Creation Error",e);
         }
