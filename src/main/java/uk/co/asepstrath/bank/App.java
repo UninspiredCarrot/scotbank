@@ -2,12 +2,8 @@ package uk.co.asepstrath.bank;
 
 import kong.unirest.core.GenericType;
 import kong.unirest.core.HttpResponse;
-import kong.unirest.core.JsonNode;
 import kong.unirest.core.Unirest;
-import kong.unirest.core.json.JSONArray;
-import kong.unirest.core.json.JSONObject;
 import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
@@ -24,8 +20,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
-import java.io.StringReader;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -84,13 +78,21 @@ public class App extends Jooby {
         DataSource ds = require(DataSource.class);
         // Open Connection to DB
         try (Connection connection = ds.getConnection()) {
-            //
+            //-----------------create the users table-----------------------------------------------
             Statement stmt = connection.createStatement();
-            stmt.executeUpdate("CREATE TABLE `Example` (`Key` varchar(255),`Value` varchar(255))");
-            stmt.executeUpdate("INSERT INTO Example " + "VALUES ('WelcomeMessage', 'Welcome to A Bank')");
-
-            //---------------Testing transaction table plus data insertion--------------------------
             String sql = (
+                    "CREATE TABLE IF NOT EXISTS `users` (" +
+                        "id VARCHAR(255) PRIMARY KEY," +
+                        "username VARCHAR(255) NOT NULL," +
+                        "password VARCHAR(255) NOT NULL" +
+                    ")"
+            );
+            stmt.executeUpdate(sql);
+            stmt.close();
+            //--------------------------------------------------------------------------------------
+
+            //--------------create transactions table and populate with data from api---------------
+            sql = (
                             "CREATE TABLE IF NOT EXISTS`transactions` (" +
                             "id VARCHAR(255) PRIMARY KEY,"+
                             "timestamp VARCHAR(255) NOT NULL,"+
@@ -99,13 +101,9 @@ public class App extends Jooby {
                             "transaction_type VARCHAR(255) NOT NULL"+
                             ")"
             );
-
+            stmt = connection.createStatement();
             stmt.executeUpdate(sql);
-
-//            StringReader sr = new StringReader(
-//                    Unirest
-//                            .get("https://api.asep-strath.co.uk/api/transactions").asString().getBody()
-//            );
+            stmt.close();
 
             URL url = new URL("https://api.asep-strath.co.uk/api/transactions");
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -132,7 +130,6 @@ public class App extends Jooby {
                 child = child.getNextSibling();
 
                 String type = child.getFirstChild().getNodeValue();
-                child = child.getNextSibling();
 
                 sql = (
                         "INSERT INTO transactions (" +
@@ -147,11 +144,11 @@ public class App extends Jooby {
                 prep.setDouble(4, amount);
                 prep.setString(5, type);
                 prep.executeUpdate();
+                prep.close();
             }
-
             //---------------------------------------------------------------------------------------
 
-            //------------get user information from api and save to a users table-----------------
+            //------------get user information from api and save to a accounts table-----------------
             sql = (
                     "CREATE TABLE IF NOT EXISTS `accounts` (" +
                     "id VARCHAR(255) PRIMARY KEY," +
@@ -159,7 +156,9 @@ public class App extends Jooby {
                     "balance DECIMAL NOT NULL," +
                     "round_up_enabled BIT NOT NULL)"
                     );
+            stmt = connection.createStatement();
             stmt.executeUpdate(sql);
+            stmt.close();
 
             HttpResponse<List<Account>> accountResponse =
                     Unirest
@@ -178,22 +177,28 @@ public class App extends Jooby {
                 prep.setDouble(3, account.getBalance());
                 prep.setBoolean(4, account.isRoundUpEnabled());
                 prep.executeUpdate();
-                log.info(
-                        String.format(
-                                "{%s} - added to database", account
-                        )
-                );
+                prep.close();
             }
             //---------------------------------------------------------------------------------------
+
+            //-------------------connect accounts and users tables-----------------------------------
+            sql = (
+                    "CREATE TABLE IF NOT EXISTS `user_accounts` (" +
+                            "user_id VARCHAR(255)," +
+                            "account_id VARCHAR(255)," +
+                            "PRIMARY KEY (user_id, account_id)," +
+                            "FOREIGN KEY (user_id) REFERENCES users(id)," +
+                            "FOREIGN KEY (account_id) REFERENCES accounts(id)" +
+                            ")"
+            );
+            stmt = connection.createStatement();
+            stmt.executeUpdate(sql);
+            stmt.close();
+            //---------------------------------------------------------------------------------------
+
         } catch (SQLException e) {
             log.error("Database Creation Error",e);
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        } catch (ParserConfigurationException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (SAXException e) {
+        } catch (ParserConfigurationException | IOException | SAXException e) {
             throw new RuntimeException(e);
         }
     }
