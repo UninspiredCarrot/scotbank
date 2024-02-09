@@ -22,7 +22,7 @@ public class Account {
         return name;
     }
 
-    public double getStartingBalance() {
+    public double getBalance() {
         return startingBalance;
     }
 
@@ -58,9 +58,6 @@ public class Account {
         startingBalance = round();
     }
 
-    public double getBalance() {
-        return startingBalance;
-    }
 
     public double round() {
         BigDecimal rn = new BigDecimal(Double.toString(startingBalance));
