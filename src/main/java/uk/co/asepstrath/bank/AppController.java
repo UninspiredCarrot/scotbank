@@ -17,13 +17,14 @@ import java.util.Map;
 public class AppController {
     private final DataSource dataSource;
     private final Logger logger;
-
+    private final DatabaseUtil db;
     /*
     This constructor can take in any dependencies the controller may need to respond to a request
      */
     public AppController(DataSource ds, Logger log) {
         dataSource = ds;
         logger = log;
+        this.db = new DatabaseUtil(dataSource);
     }
 
     @GET
