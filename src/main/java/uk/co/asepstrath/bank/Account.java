@@ -70,7 +70,7 @@ public class Account {
         return String
                 .format(
                     "{id: %s}-{name: %s}-{starting balance: %.2f}-{is rounding up enabled: %b}",
-                        this.id, this.name, this.round(), this.roundUpEnabled
+                        this.id, this.name, this.startingBalance, this.roundUpEnabled
                 );
     }
 

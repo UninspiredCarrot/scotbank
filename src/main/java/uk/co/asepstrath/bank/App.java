@@ -23,9 +23,9 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 
 public class App extends Jooby {
@@ -81,6 +81,7 @@ public class App extends Jooby {
         // Open Connection to DB
         try (Connection connection = ds.getConnection()) {
 
+
             //-----------------
             // CREATING TABLES-
             //-----------------
@@ -97,9 +98,37 @@ public class App extends Jooby {
             stmt.close();
             //--------------------------------------------------------------------------------------
 
-            //--------------create transactions table and populate with data from api---------------
+            //------------create accounts table------------------------------------------------------
             sql = (
-                            "CREATE TABLE IF NOT EXISTS`transactions` (" +
+                    "CREATE TABLE IF NOT EXISTS `accounts` (" +
+                    "id VARCHAR(255) PRIMARY KEY," +
+                    "name VARCHAR(255) NOT NULL," +
+                    "balance DECIMAL NOT NULL," +
+                    "round_up_enabled BIT NOT NULL)"
+                    );
+            stmt = connection.createStatement();
+            stmt.executeUpdate(sql);
+            stmt.close();
+            //---------------------------------------------------------------------------------------
+
+            //-------------------connect accounts and users tables-----------------------------------
+            sql = (
+                    "CREATE TABLE IF NOT EXISTS `user_accounts` (" +
+                            "user_id VARCHAR(255)," +
+                            "account_id VARCHAR(255)," +
+                            "PRIMARY KEY (user_id, account_id)," +
+                            "FOREIGN KEY (user_id) REFERENCES users(id)," +
+                            "FOREIGN KEY (account_id) REFERENCES accounts(id)" +
+                            ")"
+            );
+            stmt = connection.createStatement();
+            stmt.executeUpdate(sql);
+            stmt.close();
+            //---------------------------------------------------------------------------------------
+
+            //--------------create transactions table-----------------------------------------------
+            sql = (
+                    "CREATE TABLE IF NOT EXISTS`transactions` (" +
                             "id VARCHAR(255) PRIMARY KEY,"+
                             "timestamp VARCHAR(255) NOT NULL,"+
                             "`to` VARCHAR(255) NOT NULL," +
@@ -110,6 +139,15 @@ public class App extends Jooby {
             stmt = connection.createStatement();
             stmt.executeUpdate(sql);
             stmt.close();
+            //---------------------------------------------------------------------------------------
+
+            //---------------------------
+            // get information from api--
+            //---------------------------
+            //------------------Get accounts from api and save to table------------------------------
+
+            //---------------------------------------------------------------------------------------
+
 
             //------------create accounts table-------------------------------------------------------
             sql = (
@@ -149,13 +187,11 @@ public class App extends Jooby {
                             .get("https://api.asep-strath.co.uk/api/accounts")
                             .asObject(new GenericType<>(){});
 
-            for(Account account : accountResponse.getBody()){
-                db_util.createAccount(account);
-            }
+                db_util.createAccountEntitiesFromList((ArrayList<Account>)accountResponse.getBody());
             //---------------------------------------------------------------------------------------
 
+            //-----------------Get transaction information from api and save to data base------------
 
-            //-----------------read from the transaction api-----------------------------------------
             URL url = new URL("https://api.asep-strath.co.uk/api/transactions");
             DocumentBuilderFactory doc_builder_fact = DocumentBuilderFactory.newInstance();
             DocumentBuilder doc_builder = doc_builder_fact.newDocumentBuilder();
@@ -163,7 +199,7 @@ public class App extends Jooby {
             doc.getDocumentElement().normalize();
 
             NodeList nodeList = doc.getElementsByTagName("results");
-            
+
             for (int i = 0; i < nodeList.getLength(); i++) {
 
                 Node child = nodeList.item(i).getFirstChild();
@@ -186,11 +222,43 @@ public class App extends Jooby {
                         timestamp, amount, id, to, type
                 );
 
-                db_util.createTransaction(transaction);
+                db_util.createTransactionEntity(transaction);
 
             }
-            //---------------------------------------------------------------------------------------
+            //-----------------------------------------------------------------------------------------
 
+            //--------------------
+            //----Test Databases--
+            //--------------------
+
+            ArrayList<Account> accounts_check = db_util.getAllAccounts();
+            ArrayList<Transaction> transactions_check = db_util.getAllTransactions();
+
+            /*{
+              "id":"d2a3fef8-88bd-41da-94cf-4b040c8ab2f9",
+              "name":"Albertha Bergnaum",
+              "startingBalance":133.50,
+              "roundUpEnabled":false
+            }*/
+            Account account = db_util.getAccountByID(
+                "d2a3fef8-88bd-41da-94cf-4b040c8ab2f9"
+            );
+
+            /*<timestamp>2023-04-26 08:43</timestamp>
+            <amount>4916.66</amount>
+            <id>99d85e35-fa9b-4bc8-8897-90eff0da9c94</id>
+            <to>30865231-f0fc-4dc2-b822-6985d06e637d</to>
+            <type>DEPOSI*/
+            Transaction transaction = db_util.getTransactionByID(
+                "2db3ce0c-5623-441a-bf0b-0783e571191a"
+            );
+
+            //TODO: Test insertion and update features in db_util
+
+            //TODO: Fix unwanted rounding in the database
+
+            //TODO: Test User table once User class has been imported
+            System.out.println("This");
 
 
         } catch (SQLException e) {
