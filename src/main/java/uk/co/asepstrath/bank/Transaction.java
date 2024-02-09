@@ -58,4 +58,9 @@ public class Transaction {
         this.transaction_type = transaction_type;
     }
 
+    @Override
+    public String toString(){
+        return String.format("{%s}-{%s}-{%s}-{%.2f}-{%s}", this.id, this.timestamp, this.to, this.amount,this.transaction_type);
+    }
+
 }

@@ -7,9 +7,7 @@ import io.jooby.exception.StatusCodeException;
 import org.slf4j.Logger;
 
 import javax.sql.DataSource;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,7 +44,8 @@ public class AppController {
 
         try
         {
-            transaction = this.db.readTransactionByID(transaction_id);
+            transaction = this.db.getTransactionByID(transaction_id);
+
         }
         catch (SQLException e)
         {
