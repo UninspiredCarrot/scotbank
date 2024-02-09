@@ -16,6 +16,7 @@ import io.jooby.hikari.HikariModule;
 import org.slf4j.Logger;
 
 import javax.sql.DataSource;
+import javax.xml.crypto.Data;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -74,8 +75,15 @@ public class App extends Jooby {
 
         // Fetch DB Source
         DataSource ds = require(DataSource.class);
+        // Database util class
+        DatabaseUtil db_util = new DatabaseUtil(ds);
+
         // Open Connection to DB
         try (Connection connection = ds.getConnection()) {
+
+            //-----------------
+            // CREATING TABLES-
+            //-----------------
             //-----------------create the users table-----------------------------------------------
             Statement stmt = connection.createStatement();
             String sql = (
@@ -103,10 +111,55 @@ public class App extends Jooby {
             stmt.executeUpdate(sql);
             stmt.close();
 
+            //------------create accounts table-------------------------------------------------------
+            sql = (
+                    "CREATE TABLE IF NOT EXISTS `accounts` (" +
+                            "id VARCHAR(255) PRIMARY KEY," +
+                            "name VARCHAR(255) NOT NULL," +
+                            "balance DECIMAL NOT NULL," +
+                            "round_up_enabled BIT NOT NULL)"
+            );
+            stmt = connection.createStatement();
+            stmt.executeUpdate(sql);
+            stmt.close();
+
+            //---------------------------------------------------------------------------------------
+
+            //-------------------connect user accounts tables----------------------------------------
+            sql = (
+                    "CREATE TABLE IF NOT EXISTS `user_accounts` (" +
+                            "user_id VARCHAR(255)," +
+                            "account_id VARCHAR(255)," +
+                            "PRIMARY KEY (user_id, account_id)," +
+                            "FOREIGN KEY (user_id) REFERENCES users(id)," +
+                            "FOREIGN KEY (account_id) REFERENCES accounts(id)" +
+                            ")"
+            );
+            stmt = connection.createStatement();
+            stmt.executeUpdate(sql);
+            stmt.close();
+            //---------------------------------------------------------------------------------------
+
+            //-------------
+            // GETTING DATA-
+            //-------------
+            //----------------read accounts from the account api-------------------------------------
+            HttpResponse<List<Account>> accountResponse =
+                    Unirest
+                            .get("https://api.asep-strath.co.uk/api/accounts")
+                            .asObject(new GenericType<>(){});
+
+            for(Account account : accountResponse.getBody()){
+                db_util.createAccount(account);
+            }
+            //---------------------------------------------------------------------------------------
+
+
+            //-----------------read from the transaction api-----------------------------------------
             URL url = new URL("https://api.asep-strath.co.uk/api/transactions");
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            DocumentBuilder db = dbf.newDocumentBuilder();
-            Document doc = db.parse(new InputSource(url.openStream()));
+            DocumentBuilderFactory doc_builder_fact = DocumentBuilderFactory.newInstance();
+            DocumentBuilder doc_builder = doc_builder_fact.newDocumentBuilder();
+            Document doc = doc_builder.parse(new InputSource(url.openStream()));
             doc.getDocumentElement().normalize();
 
             NodeList nodeList = doc.getElementsByTagName("results");
@@ -129,70 +182,16 @@ public class App extends Jooby {
 
                 String type = child.getFirstChild().getNodeValue();
 
-                sql = (
-                        "INSERT INTO transactions (" +
-                                "id, `to`, timestamp, amount, transaction_type" +
-                                ")"+
-                                "VALUES (?,?,?,?,?)"
+                Transaction transaction = new Transaction(
+                        timestamp, amount, id, to, type
                 );
-                PreparedStatement prep = connection.prepareStatement(sql);
-                prep.setString(1, id);
-                prep.setString(2, to);
-                prep.setString(3, timestamp);
-                prep.setDouble(4, amount);
-                prep.setString(5, type);
-                prep.executeUpdate();
-                prep.close();
+
+                db_util.createTransaction(transaction);
+
             }
             //---------------------------------------------------------------------------------------
 
-            //------------get user information from api and save to a accounts table-----------------
-            sql = (
-                    "CREATE TABLE IF NOT EXISTS `accounts` (" +
-                    "id VARCHAR(255) PRIMARY KEY," +
-                    "name VARCHAR(255) NOT NULL," +
-                    "balance DECIMAL NOT NULL," +
-                    "round_up_enabled BIT NOT NULL)"
-                    );
-            stmt = connection.createStatement();
-            stmt.executeUpdate(sql);
-            stmt.close();
 
-            HttpResponse<List<Account>> accountResponse =
-                    Unirest
-                    .get("https://api.asep-strath.co.uk/api/accounts")
-                    .asObject(new GenericType<>(){});
-
-            for(Account account : accountResponse.getBody()){
-                sql = (
-                    "INSERT INTO accounts (" +
-                    "id, name, balance, round_up_enabled" +
-                    ")VALUES (?,?,?,?);"
-                );
-                PreparedStatement prep = connection.prepareStatement(sql);
-                prep.setString(1, account.getId());
-                prep.setString(2, account.getName());
-                prep.setDouble(3, account.getBalance());
-                prep.setBoolean(4, account.isRoundUpEnabled());
-                prep.executeUpdate();
-                prep.close();
-            }
-            //---------------------------------------------------------------------------------------
-
-            //-------------------connect accounts and users tables-----------------------------------
-            sql = (
-                    "CREATE TABLE IF NOT EXISTS `user_accounts` (" +
-                            "user_id VARCHAR(255)," +
-                            "account_id VARCHAR(255)," +
-                            "PRIMARY KEY (user_id, account_id)," +
-                            "FOREIGN KEY (user_id) REFERENCES users(id)," +
-                            "FOREIGN KEY (account_id) REFERENCES accounts(id)" +
-                            ")"
-            );
-            stmt = connection.createStatement();
-            stmt.executeUpdate(sql);
-            stmt.close();
-            //---------------------------------------------------------------------------------------
 
         } catch (SQLException e) {
             log.error("Database Creation Error",e);

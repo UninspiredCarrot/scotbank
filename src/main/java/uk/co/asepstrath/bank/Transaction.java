@@ -11,9 +11,9 @@ public class Transaction {
     }
 
     public Transaction(String timestamp, double amount, String id, String to, String transaction_type) {
+        this.timestamp = timestamp;
         this.amount = amount;
         this.id = id;
-        this.timestamp = timestamp;
         this.to = to;
         this.transaction_type = transaction_type;
     }

@@ -24,7 +24,7 @@ public class AppController {
     public AppController(DataSource ds, Logger log) {
         dataSource = ds;
         logger = log;
-        this.db = new DatabaseUtil(dataSource);
+        this.db = new DatabaseUtil(ds);
     }
 
     @GET
@@ -42,25 +42,14 @@ public class AppController {
     public ModelAndView view_transaction(@QueryParam String transaction_id){
 
         Map<String, Object> model = new HashMap<>();
-        Transaction tran = new Transaction();
+        Transaction transaction;
 
-        try {
-            Statement stmt = this.dataSource.getConnection().createStatement();
-
-            String sql = "SELECT * FROM transactions WHERE id = " + transaction_id;
-
-            ResultSet rs = stmt.executeQuery(sql);
-
-            rs.next();
-            tran = new Transaction(
-                rs.getString("timestamp"),
-                rs.getDouble("amount"),
-                rs.getString("id"),
-                rs.getString("to"),
-                rs.getString("transaction_type")
-            );
-
-        } catch (SQLException e) {
+        try
+        {
+            transaction = this.db.readTransactionByID(transaction_id);
+        }
+        catch (SQLException e)
+        {
 
             logger.error("Database Error Occurred",e);
 
@@ -68,11 +57,11 @@ public class AppController {
         }
 
         // Object should be created here and the information should be passed to a transaction view
-        model.put("ID", tran.getId());
-        model.put("amount", tran.getAmount());
-        model.put("timestamp", tran.getTimestamp());
-        model.put("to", tran.getTo());
-        model.put("transaction_type", tran.getTransaction_type());
+        model.put("ID", transaction.getId());
+        model.put("amount", transaction.getAmount());
+        model.put("timestamp", transaction.getTimestamp());
+        model.put("to", transaction.getTo());
+        model.put("transaction_type", transaction.getTransaction_type());
 
         return new ModelAndView("view_transaction.hbs", model);
 
