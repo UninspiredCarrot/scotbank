@@ -25,7 +25,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.List;
 
 public class App extends Jooby {
@@ -52,7 +51,6 @@ public class App extends Jooby {
         Logger log = getLog();
 
         mvc(new ExampleController(ds,log));
-
         mvc(new AppController(ds, log));
 
         /*
@@ -112,7 +110,7 @@ public class App extends Jooby {
             doc.getDocumentElement().normalize();
 
             NodeList nodeList = doc.getElementsByTagName("results");
-            ArrayList<Transaction> transactions = new ArrayList<>();
+            
             for (int i = 0; i < nodeList.getLength(); i++) {
 
                 Node child = nodeList.item(i).getFirstChild();
