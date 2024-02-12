@@ -16,7 +16,6 @@ import io.jooby.hikari.HikariModule;
 import org.slf4j.Logger;
 
 import javax.sql.DataSource;
-import javax.xml.crypto.Data;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -49,6 +48,7 @@ public class App extends Jooby {
         Now we set up our controllers and their dependencies
          */
         DataSource ds = require(DataSource.class);
+
         Logger log = getLog();
 
         mvc(new ExampleController(ds,log));
@@ -141,14 +141,6 @@ public class App extends Jooby {
             stmt.close();
             //---------------------------------------------------------------------------------------
 
-            //---------------------------
-            // get information from api--
-            //---------------------------
-            //------------------Get accounts from api and save to table------------------------------
-
-            //---------------------------------------------------------------------------------------
-
-
             //------------create accounts table-------------------------------------------------------
             sql = (
                     "CREATE TABLE IF NOT EXISTS `accounts` (" +
@@ -178,9 +170,9 @@ public class App extends Jooby {
             stmt.close();
             //---------------------------------------------------------------------------------------
 
-            //-------------
-            // GETTING DATA-
-            //-------------
+            //---------------------------
+            // get information from api--
+            //---------------------------
             //----------------read accounts from the account api-------------------------------------
             HttpResponse<List<Account>> accountResponse =
                     Unirest
@@ -200,6 +192,7 @@ public class App extends Jooby {
 
             NodeList nodeList = doc.getElementsByTagName("results");
 
+            ArrayList<Transaction> transactions = new ArrayList<>();
             for (int i = 0; i < nodeList.getLength(); i++) {
 
                 Node child = nodeList.item(i).getFirstChild();
@@ -221,10 +214,9 @@ public class App extends Jooby {
                 Transaction transaction = new Transaction(
                         timestamp, amount, id, to, type
                 );
-
-                db_util.createTransactionEntity(transaction);
-
+                transactions.add(transaction);
             }
+            db_util.createTransactionEntitiesFromList(transactions);
             //-----------------------------------------------------------------------------------------
 
             //--------------------
@@ -243,6 +235,7 @@ public class App extends Jooby {
             Account account = db_util.getAccountByID(
                 "d2a3fef8-88bd-41da-94cf-4b040c8ab2f9"
             );
+            System.out.println(account);
 
             /*<timestamp>2023-04-26 08:43</timestamp>
             <amount>4916.66</amount>
@@ -250,15 +243,15 @@ public class App extends Jooby {
             <to>30865231-f0fc-4dc2-b822-6985d06e637d</to>
             <type>DEPOSI*/
             Transaction transaction = db_util.getTransactionByID(
-                "2db3ce0c-5623-441a-bf0b-0783e571191a"
+                "99d85e35-fa9b-4bc8-8897-90eff0da9c94"
             );
+            System.out.println(transaction);
 
             //TODO: Test insertion and update features in db_util
 
             //TODO: Fix unwanted rounding in the database
 
             //TODO: Test User table once User class has been imported
-            System.out.println("This");
 
 
         } catch (SQLException e) {
