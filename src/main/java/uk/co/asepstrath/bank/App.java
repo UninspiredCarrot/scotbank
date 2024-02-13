@@ -87,86 +87,83 @@ public class App extends Jooby {
             //-----------------
             //-----------------create the users table-----------------------------------------------
             Statement stmt = connection.createStatement();
-            String sql = (
-                    "CREATE TABLE IF NOT EXISTS `users` (" +
-                        "id VARCHAR(255) PRIMARY KEY," +
-                        "username VARCHAR(255) NOT NULL," +
-                        "password VARCHAR(255) NOT NULL" +
-                    ")"
+            stmt.executeUpdate(
+            "CREATE TABLE IF NOT EXISTS `users` (" +
+                    "id VARCHAR(255) PRIMARY KEY," +
+                    "username VARCHAR(255) NOT NULL," +
+                    "password VARCHAR(255) NOT NULL" +
+                ")"
             );
-            stmt.executeUpdate(sql);
             stmt.close();
             //--------------------------------------------------------------------------------------
 
             //------------create accounts table------------------------------------------------------
-            sql = (
-                    "CREATE TABLE IF NOT EXISTS `accounts` (" +
+
+            stmt = connection.createStatement();
+            stmt.executeUpdate(
+            "CREATE TABLE IF NOT EXISTS `accounts` (" +
                     "id VARCHAR(255) PRIMARY KEY," +
                     "name VARCHAR(255) NOT NULL," +
                     "balance DECIMAL NOT NULL," +
-                    "round_up_enabled BIT NOT NULL)"
-                    );
-            stmt = connection.createStatement();
-            stmt.executeUpdate(sql);
+                    "round_up_enabled BIT NOT NULL" +
+                ")"
+            );
             stmt.close();
             //---------------------------------------------------------------------------------------
 
             //-------------------connect accounts and users tables-----------------------------------
-            sql = (
-                    "CREATE TABLE IF NOT EXISTS `user_accounts` (" +
-                            "user_id VARCHAR(255)," +
-                            "account_id VARCHAR(255)," +
-                            "PRIMARY KEY (user_id, account_id)," +
-                            "FOREIGN KEY (user_id) REFERENCES users(id)," +
-                            "FOREIGN KEY (account_id) REFERENCES accounts(id)" +
-                            ")"
-            );
             stmt = connection.createStatement();
-            stmt.executeUpdate(sql);
+            stmt.executeUpdate(
+            "CREATE TABLE IF NOT EXISTS `user_accounts` (" +
+                    "user_id VARCHAR(255)," +
+                    "account_id VARCHAR(255)," +
+                    "PRIMARY KEY (user_id, account_id)," +
+                    "FOREIGN KEY (user_id) REFERENCES users(id)," +
+                    "FOREIGN KEY (account_id) REFERENCES accounts(id)" +
+                ")"
+            );
             stmt.close();
             //---------------------------------------------------------------------------------------
 
             //--------------create transactions table-----------------------------------------------
-            sql = (
-                    "CREATE TABLE IF NOT EXISTS`transactions` (" +
-                            "id VARCHAR(255) PRIMARY KEY,"+
-                            "timestamp VARCHAR(255) NOT NULL,"+
-                            "`to` VARCHAR(255) NOT NULL," +
-                            "amount DECIMAL NOT NULL,"+
-                            "transaction_type VARCHAR(255) NOT NULL"+
-                            ")"
-            );
             stmt = connection.createStatement();
-            stmt.executeUpdate(sql);
+            stmt.executeUpdate(
+            "CREATE TABLE IF NOT EXISTS`transactions` (" +
+                    "id VARCHAR(255) PRIMARY KEY,"+
+                    "timestamp VARCHAR(255) NOT NULL,"+
+                    "`to` VARCHAR(255) NOT NULL," +
+                    "amount DECIMAL NOT NULL,"+
+                    "transaction_type VARCHAR(255) NOT NULL"+
+                ")"
+            );
             stmt.close();
             //---------------------------------------------------------------------------------------
 
             //------------create accounts table-------------------------------------------------------
-            sql = (
-                    "CREATE TABLE IF NOT EXISTS `accounts` (" +
-                            "id VARCHAR(255) PRIMARY KEY," +
-                            "name VARCHAR(255) NOT NULL," +
-                            "balance DECIMAL NOT NULL," +
-                            "round_up_enabled BIT NOT NULL)"
-            );
             stmt = connection.createStatement();
-            stmt.executeUpdate(sql);
+            stmt.executeUpdate(
+            "CREATE TABLE IF NOT EXISTS `accounts` (" +
+                    "id VARCHAR(255) PRIMARY KEY," +
+                    "name VARCHAR(255) NOT NULL," +
+                    "balance DECIMAL NOT NULL," +
+                    "round_up_enabled BIT NOT NULL" +
+                ")"
+            );
             stmt.close();
 
             //---------------------------------------------------------------------------------------
 
             //-------------------connect user accounts tables----------------------------------------
-            sql = (
-                    "CREATE TABLE IF NOT EXISTS `user_accounts` (" +
-                            "user_id VARCHAR(255)," +
-                            "account_id VARCHAR(255)," +
-                            "PRIMARY KEY (user_id, account_id)," +
-                            "FOREIGN KEY (user_id) REFERENCES users(id)," +
-                            "FOREIGN KEY (account_id) REFERENCES accounts(id)" +
-                            ")"
-            );
             stmt = connection.createStatement();
-            stmt.executeUpdate(sql);
+            stmt.executeUpdate(
+            "CREATE TABLE IF NOT EXISTS `user_accounts` (" +
+                    "user_id VARCHAR(255)," +
+                    "account_id VARCHAR(255)," +
+                    "PRIMARY KEY (user_id, account_id)," +
+                    "FOREIGN KEY (user_id) REFERENCES users(id)," +
+                    "FOREIGN KEY (account_id) REFERENCES accounts(id)" +
+                ")"
+            );
             stmt.close();
             //---------------------------------------------------------------------------------------
 

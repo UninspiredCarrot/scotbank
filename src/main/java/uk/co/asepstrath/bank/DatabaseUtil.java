@@ -15,28 +15,29 @@ public class DatabaseUtil {
     // Create User Entity.
 /*
     public void createUserEntity(User user) throws SQLException{
-        String sql = (
+        Connection con = ds.getConnection();
+        PreparedStatement prep = con.prepareStatement(
             "INSERT INTO users (" +
                 "id, username, password" +
             ")VALUES(?,?,?)"
         );
-        Connection con = ds.getConnection();
-        PreparedStatement prep = con.prepareStatement(sql);
 
         prep.setString(1, user.getId());
         prep.setString(2, user.getName());
         prep.setString(3, user.getPassword());
+        prep.executeUpdate();
+        prep.close();
+        con.close();
     }
 */
     // Create Account Entity.
     public void createAccountEntity(Account account, String user_id) throws SQLException {
-        String sql = (
-                "INSERT INTO accounts (" +
-                    "id, name, balance, round_up_enabled" +
-                ")VALUES (?,?,?,?);"
-        );
         Connection con = ds.getConnection();
-        PreparedStatement prep = con.prepareStatement(sql);
+        PreparedStatement prep = con.prepareStatement(
+        "INSERT INTO accounts (" +
+                "id, name, balance, round_up_enabled" +
+            ")VALUES (?,?,?,?);"
+        );
 
         prep.setString(1, account.getId());
         prep.setString(2, account.getName());
@@ -59,13 +60,11 @@ public class DatabaseUtil {
         Connection con = ds.getConnection();
 
         for(Account account : accounts) {
-            String sql = (
-                    "INSERT INTO accounts (" +
-                        "id, name, balance, round_up_enabled" +
-                    ")VALUES (?,?,?,?);"
+            PreparedStatement prep = con.prepareStatement(
+            "INSERT INTO accounts (" +
+                    "id, name, balance, round_up_enabled" +
+                ")VALUES (?,?,?,?);"
             );
-            PreparedStatement prep = con.prepareStatement(sql);
-
             prep.setString(1, account.getId());
             prep.setString(2, account.getName());
             prep.setDouble(3, account.getBalance());
@@ -79,13 +78,12 @@ public class DatabaseUtil {
 
     // Create User Account Entity
     public void createUserAccountEntity(String user_id, String account_id) throws SQLException{
-        String sql = (
-                "INSERT INTO user_accounts (" +
-                    "user_id, account_id" +
-                ")VALUES (?,?)"
-        );
         Connection con = ds.getConnection();
-        PreparedStatement prep = con.prepareStatement(sql);
+        PreparedStatement prep = con.prepareStatement(
+        "INSERT INTO user_accounts (" +
+                "user_id, account_id" +
+            ")VALUES (?,?)"
+        );
 
         prep.setString(1, user_id);
         prep.setString(2, account_id);
@@ -98,13 +96,12 @@ public class DatabaseUtil {
 
     // Create Transaction Entity.
     public void createTransactionEntity(Transaction transaction) throws SQLException{
-        String sql = (
-                "INSERT INTO transactions (" +
-                    "   id, `to`, timestamp, amount, transaction_type" +
-                ") VALUES (?,?,?,?,?)"
-        );
         Connection con = ds.getConnection();
-        PreparedStatement prep = con.prepareStatement(sql);
+        PreparedStatement prep = con.prepareStatement(
+        "INSERT INTO transactions (" +
+                "   id, `to`, timestamp, amount, transaction_type" +
+            ") VALUES (?,?,?,?,?)"
+        );
 
         prep.setString(1, transaction.getId());
         prep.setString(2, transaction.getTo());
@@ -121,13 +118,11 @@ public class DatabaseUtil {
     public void createTransactionEntitiesFromList(ArrayList<Transaction> transactions) throws SQLException{
         Connection con = ds.getConnection();
         for(Transaction transaction : transactions){
-            String sql = (
-                    "INSERT INTO transactions (" +
-                            "   id, `to`, timestamp, amount, transaction_type" +
-                            ") VALUES (?,?,?,?,?)"
+            PreparedStatement prep = con.prepareStatement(
+            "INSERT INTO transactions (" +
+                    "id, `to`, timestamp, amount, transaction_type" +
+                ") VALUES (?,?,?,?,?)"
             );
-
-            PreparedStatement prep = con.prepareStatement(sql);
 
             prep.setString(1, transaction.getId());
             prep.setString(2, transaction.getTo());
@@ -147,11 +142,11 @@ public class DatabaseUtil {
     // Read User.
 /*
     public User getUserByID(String user_id) throws SQLException{
-        String sql = ("SELECT * FROM users WHERE id = '"+user_id+"'");
-
         Connection con = ds.getConnection();
         Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery(sql);
+        ResultSet rs = stmt.executeQuery(
+            "SELECT * FROM users WHERE id = '"+user_id+"'"
+        );
 
         rs.next();
 
@@ -169,14 +164,14 @@ public class DatabaseUtil {
     }
 */
 
-// Read Users.
+    // Read Users.
 /*
     public ArrayList<User> getAllUsers() throws SQLException{
-        String sql = "SELECT * FROM users";
-
         Connection con = ds.getConnection();
         Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery(sql);
+        ResultSet rs = stmt.executeQuery(
+            "SELECT * FROM users"
+        );
 
         ArrayList<User> users = new ArrayList<>();
 
@@ -196,15 +191,57 @@ public class DatabaseUtil {
         return users;
     }
 */
+    public boolean checkUsernameExists(String username) throws SQLException{
+        Connection con = ds.getConnection();
+        Statement stmt = con.createStatement();
+        ResultSet rs = stmt.executeQuery(
+                "SELECT * FROM users WHERE username = ''"+username+"''"
+        );
+        if(rs.next()) {
+            rs.close();
+            stmt.close();
+            rs.close();
+            return true;
+        }
+        else{
+            rs.close();
+            stmt.close();
+            con.close();
+            return false;
+        }
+    }
+
+    public boolean comparePassword(String username, String password) throws SQLException{
+        Connection con = ds.getConnection();
+        Statement stmt = con.createStatement();
+        ResultSet rs = stmt.executeQuery(
+            "SELECT password FROM users WHERE username = \'"+username+"\'"
+        );
+        rs.next();
+        if(rs.getString("password").equals(password))
+        {
+            rs.close();
+            stmt.close();
+            con.close();
+            return true;
+        }
+        else
+        {
+            rs.close();
+            stmt.close();
+            con.close();
+            return false;
+        }
+    }
+
 
     // Read Account.
     public Account getAccountByID(String account_id) throws SQLException {
-        String sql = (
-                "SELECT * FROM accounts WHERE id = \'"+account_id+"\'"
-        );
         Connection con = ds.getConnection();
         Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery(sql);
+        ResultSet rs = stmt.executeQuery(
+        "SELECT * FROM accounts WHERE id = \'"+account_id+"\'"
+        );
 
         rs.next();
 
@@ -226,12 +263,11 @@ public class DatabaseUtil {
     public ArrayList<Account> getAllAccounts() throws SQLException{
         ArrayList<Account> accounts = new ArrayList<>();
 
-        String sql = (
-                "SELECT * FROM accounts"
-        );
         Connection con = ds.getConnection();
         Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery(sql);
+        ResultSet rs = stmt.executeQuery(
+        "SELECT * FROM accounts"
+        );
 
         while(rs.next()){
             Account account = new Account();
@@ -348,14 +384,13 @@ public class DatabaseUtil {
 // Update User.
 /*
     public User updateUser(String user_id, User user) throws SQLException{
-        String sql = (
-                "UPDATE users " +
-                "SET " +
-                    "username = \'?\' password = \'?\'" +
-                "WHERE id = \'?\'"
-        );
         Connection con = ds.getConnection();
-        PreparedStatement prep = con.prepareStatement(sql);
+        PreparedStatement prep = con.prepareStatement(
+            "UPDATE users " +
+            "SET " +
+                "username = \'?\' password = \'?\'" +
+            "WHERE id = \'?\'"
+        );
         prep.setString(1, user.getName());
         prep.setString(2, user.getPassword());
         prep.setString(3, user_id);
@@ -370,15 +405,13 @@ public class DatabaseUtil {
 
     // Update Account.
     public Account updateAccount(String account_id, Account account) throws SQLException{
-        String sql = (
-                "UPDATE accounts " +
-                "SET " +
-                    "name = \'?\', balance = ?, round_up_enabled = ? " +
-                "WHERE id = \'?\'"
-
-        );
         Connection con = ds.getConnection();
-        PreparedStatement prep = con.prepareStatement(sql);
+        PreparedStatement prep = con.prepareStatement(
+        "UPDATE accounts " +
+            "SET " +
+                "name = ?, balance = ?, round_up_enabled = ? " +
+            "WHERE id = ? "
+        );
 
         prep.setString(1, account.getName());
         prep.setDouble(2, account.getBalance());
@@ -395,15 +428,14 @@ public class DatabaseUtil {
 
     // Update Transaction
     public Transaction updateTransaction(String transaction_id, Transaction transaction) throws SQLException{
-        String sql = (
-                "UPDATE transactions "+
-                "SET " +
-                    "timestamp = \'?\', `to` = \'?\', amount = ?, transaction_type = \'?\' " +
-                "WHERE id = \'?\'"
-        );
 
         Connection con = ds.getConnection();
-        PreparedStatement prep = con.prepareStatement(sql);
+        PreparedStatement prep = con.prepareStatement(
+        "UPDATE transactions "+
+            "SET " +
+                "timestamp = ?, `to` = ?, amount = ?, transaction_type = ? " +
+            "WHERE id = ?"
+        );
 
         prep.setString(1, transaction.getTimestamp());
         prep.setString(2, transaction.getTo());
@@ -414,7 +446,6 @@ public class DatabaseUtil {
         prep.executeUpdate();
 
         prep.close();
-
         con.close();
 
         return transaction;
