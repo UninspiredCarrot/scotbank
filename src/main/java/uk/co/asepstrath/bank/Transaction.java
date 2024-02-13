@@ -5,16 +5,18 @@ public class Transaction {
     private String  id,
                     timestamp,
                     to,
+                    from,
                     transaction_type;
 
     public Transaction() {
     }
 
-    public Transaction(String timestamp, double amount, String id, String to, String transaction_type) {
+    public Transaction(String timestamp, double amount, String id, String to, String from, String transaction_type) {
         this.timestamp = timestamp;
         this.amount = amount;
         this.id = id;
         this.to = to;
+        this.from = from;
         this.transaction_type = transaction_type;
     }
 
@@ -33,6 +35,8 @@ public class Transaction {
     public String getTo() {
         return to;
     }
+
+    public String getFrom(){return from;}
 
     public String getTransaction_type() {
         return transaction_type;
@@ -54,13 +58,18 @@ public class Transaction {
         this.to = to;
     }
 
+    public void setFrom(String from){this.from = from;}
+
     public void setTransaction_type(String transaction_type) {
         this.transaction_type = transaction_type;
     }
 
     @Override
     public String toString(){
-        return String.format("{%s}-{%s}-{%s}-{%.2f}-{%s}", this.id, this.timestamp, this.to, this.amount,this.transaction_type);
+        return String.format(
+                "{id: %s}\n{timestamp: %s}\n{to: %s}\n{from: %s}-\n{amount: %.2f}-\n{transaction type: %s}",
+                this.id, this.timestamp, this.to, this.from, this.amount,this.transaction_type
+        );
     }
 
 }

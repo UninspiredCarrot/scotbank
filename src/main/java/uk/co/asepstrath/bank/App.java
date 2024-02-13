@@ -103,7 +103,7 @@ public class App extends Jooby {
             stmt.executeUpdate(
             "CREATE TABLE IF NOT EXISTS `accounts` (" +
                     "id VARCHAR(255) PRIMARY KEY," +
-                    "name VARCHAR(255) NOT NULL," +
+                    "`name` VARCHAR(255) NOT NULL," +
                     "balance DECIMAL NOT NULL," +
                     "round_up_enabled BIT NOT NULL" +
                 ")"
@@ -130,8 +130,9 @@ public class App extends Jooby {
             stmt.executeUpdate(
             "CREATE TABLE IF NOT EXISTS`transactions` (" +
                     "id VARCHAR(255) PRIMARY KEY,"+
-                    "timestamp VARCHAR(255) NOT NULL,"+
+                    "`timestamp` VARCHAR(255) NOT NULL,"+
                     "`to` VARCHAR(255) NOT NULL," +
+                    "`from` VARCHAR(255) NOT NULL," +
                     "amount DECIMAL NOT NULL,"+
                     "transaction_type VARCHAR(255) NOT NULL"+
                 ")"
@@ -144,7 +145,7 @@ public class App extends Jooby {
             stmt.executeUpdate(
             "CREATE TABLE IF NOT EXISTS `accounts` (" +
                     "id VARCHAR(255) PRIMARY KEY," +
-                    "name VARCHAR(255) NOT NULL," +
+                    "`name` VARCHAR(255) NOT NULL," +
                     "balance DECIMAL NOT NULL," +
                     "round_up_enabled BIT NOT NULL" +
                 ")"
@@ -200,6 +201,9 @@ public class App extends Jooby {
                 double amount = Double.parseDouble(child.getFirstChild().getNodeValue());
                 child = child.getNextSibling();
 
+                String from = child.getFirstChild().getNodeValue();
+                child = child.getNextSibling();
+
                 String id = child.getFirstChild().getNodeValue();
                 child = child.getNextSibling();
 
@@ -209,7 +213,7 @@ public class App extends Jooby {
                 String type = child.getFirstChild().getNodeValue();
 
                 Transaction transaction = new Transaction(
-                        timestamp, amount, id, to, type
+                        timestamp, amount, id, to, from, type
                 );
                 transactions.add(transaction);
             }
@@ -223,27 +227,29 @@ public class App extends Jooby {
             ArrayList<Account> accounts_check = db_util.getAllAccounts();
             ArrayList<Transaction> transactions_check = db_util.getAllTransactions();
 
-            /*{
-              "id":"d2a3fef8-88bd-41da-94cf-4b040c8ab2f9",
-              "name":"Albertha Bergnaum",
-              "startingBalance":133.50,
-              "roundUpEnabled":false
-            }*/
+            /*  "id":"5d85cff3-4792-43fe-9674-173bf7ef5c5c",
+                "name":"Mr. Rickey Upton",
+                "startingBalance":544.04,
+                "roundUpEnabled":false} */
+            System.out.println("-------------------------------------");
             Account account = db_util.getAccountByID(
-                "d2a3fef8-88bd-41da-94cf-4b040c8ab2f9"
+    "25e9b894-c75b-498a-80c6-614942211594"
             );
             System.out.println(account);
+            System.out.println("-------------------------------------");
 
-            /*<timestamp>2023-04-26 08:43</timestamp>
-            <amount>4916.66</amount>
-            <id>99d85e35-fa9b-4bc8-8897-90eff0da9c94</id>
-            <to>30865231-f0fc-4dc2-b822-6985d06e637d</to>
-            <type>DEPOSI*/
+            /*  <timestamp>2023-04-10 08:43</timestamp>
+                <amount>150.00</amount>
+                <from>25e9b894-c75b-498a-80c6-614942211594</from>
+                <id>50567a98-9ffd-4d53-b75d-4848c4086416</id>
+                <to>SAI</to>
+                <type>PAYMENT</type>    */
+            System.out.println("-------------------------------------");
             Transaction transaction = db_util.getTransactionByID(
-                "99d85e35-fa9b-4bc8-8897-90eff0da9c94"
+                "50567a98-9ffd-4d53-b75d-4848c4086416"
             );
             System.out.println(transaction);
-
+            System.out.println("-------------------------------------");
             //TODO: Test insertion and update features in db_util
 
             //TODO: Fix unwanted rounding in the database

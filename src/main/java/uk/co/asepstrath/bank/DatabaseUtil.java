@@ -118,17 +118,21 @@ public class DatabaseUtil {
     public void createTransactionEntitiesFromList(ArrayList<Transaction> transactions) throws SQLException{
         Connection con = ds.getConnection();
         for(Transaction transaction : transactions){
+            if(transaction.getId().equals("a4461ca9-e7f0-4ab2-bcc4-98121928520d"))
+                System.out.println("here");
+
             PreparedStatement prep = con.prepareStatement(
-            "INSERT INTO transactions (" +
-                    "id, `to`, timestamp, amount, transaction_type" +
-                ") VALUES (?,?,?,?,?)"
+            "INSERT INTO `transactions` (" +
+                    "id, `timestamp`, `to`, `from`, amount, transaction_type" +
+                ") VALUES (?,?,?,?,?,?)"
             );
 
             prep.setString(1, transaction.getId());
+            prep.setString(4, transaction.getTimestamp());
             prep.setString(2, transaction.getTo());
-            prep.setString(3, transaction.getTimestamp());
-            prep.setDouble(4, transaction.getAmount());
-            prep.setString(5, transaction.getTransaction_type());
+            prep.setString(3, transaction.getFrom());
+            prep.setDouble(5, transaction.getAmount());
+            prep.setString(6, transaction.getTransaction_type());
 
             prep.executeUpdate();
 
@@ -240,7 +244,7 @@ public class DatabaseUtil {
         Connection con = ds.getConnection();
         Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery(
-        "SELECT * FROM accounts WHERE id = \'"+account_id+"\'"
+        "SELECT * FROM accounts WHERE id = '"+account_id+"'"
         );
 
         rs.next();
@@ -302,6 +306,7 @@ public class DatabaseUtil {
         transaction.setId(rs.getString("id"));
         transaction.setTimestamp(rs.getString("timestamp"));
         transaction.setTo(rs.getString("to"));
+        transaction.setFrom(rs.getString("from"));
         transaction.setTransaction_type(rs.getString("transaction_type"));
         transaction.setAmount(rs.getFloat("amount"));
 
@@ -450,16 +455,4 @@ public class DatabaseUtil {
 
         return transaction;
     }
-
-
-
-    // Delete User.
-
-    // Delete Account.
-
-    // Delete Transaction
-
-
-
-
 }
