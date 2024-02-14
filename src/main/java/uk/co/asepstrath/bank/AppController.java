@@ -16,6 +16,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 @Path("/bank")
 public class AppController {
@@ -53,6 +54,14 @@ public class AppController {
         model.put("balance", acc.getBalance());
         model.put("round_up", acc.isRoundUpEnabled());
         return new ModelAndView("overview.hbs", model);
+    }
+
+    @GET("/login")
+    public ModelAndView login() {
+        // we must create a model to pass to the "login" template
+        Map<String, Object> model = new HashMap<>();
+
+        return new ModelAndView("login.hbs", model);
     }
 
     @GET("/view_transaction")
