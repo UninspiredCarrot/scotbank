@@ -82,8 +82,7 @@ public class App extends Jooby {
 
         // Open Connection to DB
         try (Connection connection = ds.getConnection()) {
-
-
+            
             //-----------------
             // CREATING TABLES-
             //-----------------
@@ -136,34 +135,6 @@ public class App extends Jooby {
                     "`from` VARCHAR(255) NOT NULL," +
                     "amount DECIMAL NOT NULL,"+
                     "transaction_type VARCHAR(255) NOT NULL"+
-                ")"
-            );
-            stmt.close();
-            //---------------------------------------------------------------------------------------
-
-            //------------create accounts table-------------------------------------------------------
-            stmt = connection.createStatement();
-            stmt.executeUpdate(
-            "CREATE TABLE IF NOT EXISTS `accounts` (" +
-                    "id VARCHAR(255) PRIMARY KEY," +
-                    "`name` VARCHAR(255) NOT NULL," +
-                    "balance DECIMAL NOT NULL," +
-                    "round_up_enabled BIT NOT NULL" +
-                ")"
-            );
-            stmt.close();
-
-            //---------------------------------------------------------------------------------------
-
-            //-------------------connect user accounts tables----------------------------------------
-            stmt = connection.createStatement();
-            stmt.executeUpdate(
-            "CREATE TABLE IF NOT EXISTS `user_accounts` (" +
-                    "user_id VARCHAR(255)," +
-                    "account_id VARCHAR(255)," +
-                    "PRIMARY KEY (user_id, account_id)," +
-                    "FOREIGN KEY (user_id) REFERENCES users(id)," +
-                    "FOREIGN KEY (account_id) REFERENCES accounts(id)" +
                 ")"
             );
             stmt.close();
