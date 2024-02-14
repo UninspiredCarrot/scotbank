@@ -2,6 +2,7 @@ package uk.co.asepstrath.bank;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 
 public class Account {
 
@@ -9,7 +10,7 @@ public class Account {
                     name;
     private double startingBalance;
     private boolean roundUpEnabled;
-
+    private ArrayList<Transaction> transactions;
     public Account () {
         startingBalance = 0;
     }
@@ -30,6 +31,10 @@ public class Account {
         return roundUpEnabled;
     }
 
+    public ArrayList<Transaction> getTransactions() {
+        return transactions;
+    }
+
     public void setId(String id) { this.id = id; }
 
     public void setName(String name) {
@@ -42,6 +47,10 @@ public class Account {
 
     public void setRoundUpEnabled(boolean roundUpEnabled) {
         this.roundUpEnabled = roundUpEnabled;
+    }
+
+    public void setTransactions(ArrayList<Transaction> transactions) {
+        this.transactions = transactions;
     }
 
     public void deposit(double amount) {

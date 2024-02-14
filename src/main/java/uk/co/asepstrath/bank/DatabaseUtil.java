@@ -118,9 +118,6 @@ public class DatabaseUtil {
     public void createTransactionEntitiesFromList(ArrayList<Transaction> transactions) throws SQLException{
         Connection con = ds.getConnection();
         for(Transaction transaction : transactions){
-            if(transaction.getId().equals("a4461ca9-e7f0-4ab2-bcc4-98121928520d"))
-                System.out.println("here");
-
             PreparedStatement prep = con.prepareStatement(
             "INSERT INTO `transactions` (" +
                     "id, `timestamp`, `to`, `from`, amount, transaction_type" +
@@ -128,9 +125,9 @@ public class DatabaseUtil {
             );
 
             prep.setString(1, transaction.getId());
-            prep.setString(4, transaction.getTimestamp());
-            prep.setString(2, transaction.getTo());
-            prep.setString(3, transaction.getFrom());
+            prep.setString(2, transaction.getTimestamp());
+            prep.setString(3, transaction.getTo());
+            prep.setString(4, transaction.getFrom());
             prep.setDouble(5, transaction.getAmount());
             prep.setString(6, transaction.getTransaction_type());
 
@@ -255,12 +252,55 @@ public class DatabaseUtil {
         account.setName(rs.getString("name"));
         account.setStartingBalance(rs.getDouble("balance"));
         account.setRoundUpEnabled(rs.getBoolean("round_up_enabled"));
+        account.setTransactions(getTransactionsByAccount(account.getId()));
 
         stmt.close();
         rs.close();
         con.close();
 
         return account;
+    }
+
+    // Read User Account
+    public ArrayList<Account> getAccountsByUser(String user_id) throws SQLException{
+
+        ArrayList<Account> accounts = new ArrayList<>();
+        ArrayList<String> account_ids = new ArrayList<>();
+
+        Connection con = ds.getConnection();
+        Statement stmt = con.createStatement();
+        ResultSet rs = stmt.executeQuery(
+                "SELECT * FROM user_accounts WHERE user_id \'"+user_id+"\'"
+        );
+        while(rs.next()){
+            account_ids.add(rs.getString("account_id"));
+        }
+
+        stmt.close();
+        rs.close();
+
+        for(String id : account_ids){
+            stmt = con.createStatement();
+            rs = stmt.executeQuery(
+                    "SELECT * FROM accounts WHERE id =\' "+id+"\'"
+            );
+
+            rs.next();
+
+            Account account = new Account();
+            account.setId(rs.getString("id"));
+            account.setName(rs.getString("name"));
+            account.setStartingBalance(rs.getDouble("balance"));
+            account.setRoundUpEnabled(rs.getBoolean("round_up_enabled"));
+            account.setTransactions(getTransactionsByAccount(account.getId()));
+            accounts.add(account);
+
+
+            stmt.close();
+            rs.close();
+            con.close();
+        }
+        return accounts;
     }
 
     // Read Accounts.
@@ -279,7 +319,7 @@ public class DatabaseUtil {
             account.setName(rs.getString("name"));
             account.setStartingBalance(rs.getDouble("balance"));
             account.setRoundUpEnabled(rs.getBoolean("round_up_enabled"));
-
+            account.setTransactions(getTransactionsByAccount(account.getId()));
             accounts.add(account);
         }
 
@@ -344,46 +384,22 @@ public class DatabaseUtil {
         return transactions;
     }
 
-    // Read User Account
-    public ArrayList<Account> getAccountsByUser(String user_id) throws SQLException{
-
-        ArrayList<Account> accounts = new ArrayList<>();
-        ArrayList<String> account_ids = new ArrayList<>();
-
+    public ArrayList<Transaction> getTransactionsByAccount(String account_id) throws SQLException{
         Connection con = ds.getConnection();
         Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery(
-        "SELECT * FROM user_accounts WHERE user_id \'"+user_id+"\'"
+                "SELECT * FROM `transactions` WHERE `from` = \'"+account_id+"\'"
         );
-        while(rs.next()){
-            account_ids.add(rs.getString("account_id"));
+        ArrayList<Transaction> transactions = new ArrayList<>();
+        while(rs.next())
+        {
+            transactions.add(getTransactionByID(rs.getString("id")));
         }
-
-        stmt.close();
         rs.close();
-
-        for(String id : account_ids){
-            stmt = con.createStatement();
-            rs = stmt.executeQuery(
-            "SELECT * FROM accounts WHERE id =\' "+id+"\'"
-            );
-
-            while(rs.next()){
-                Account account = new Account();
-                account.setId(rs.getString("id"));
-                account.setName(rs.getString("name"));
-                account.setStartingBalance(rs.getDouble("balance"));
-                account.setRoundUpEnabled(rs.getBoolean("round_up_enabled"));
-                accounts.add(account);
-            }
-
-            stmt.close();
-            rs.close();
-            con.close();
-        }
-        return accounts;
+        stmt.close();
+        con.close();
+        return transactions;
     }
-
 
 
 // Update User.
