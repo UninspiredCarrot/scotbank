@@ -14,6 +14,7 @@ import java.awt.print.Book;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,7 +34,7 @@ public class AppController {
 
     @GET
     public String welcome() { return "Welcome to Scotbank! "; }
-
+    /*
     @GET("/overview")
     public ModelAndView overview(@QueryParam String id) {
         Map<String, Object> model = new HashMap<>();
@@ -92,6 +93,22 @@ public class AppController {
         model.put("transaction_type", transaction.getTransaction_type());
 
         return new ModelAndView("view_transaction.hbs", model);
+    }
+    */
+    @GET("/view_all_transactions")
+    public ModelAndView view_all() {
+        Map<String, Object> model = new HashMap<>();
+        ArrayList<Transaction> transactions;
 
+        try {
+            transactions = this.db.getAllTransactions();
+        } catch (SQLException e) {
+            logger.error("Database Error Occurred",e);
+            throw new StatusCodeException(StatusCode.SERVER_ERROR, "Database Error Occurred");
+        }
+
+        model.put("Transaction", transactions);
+
+        return new ModelAndView("view_all_transaction.hbs", model);
     }
 }
