@@ -14,7 +14,6 @@ public class DatabaseUtil {
         this.ds = ds;
     }
 
-
     // Create User Entity.
 
     // Create Account Entity.
@@ -165,8 +164,6 @@ public class DatabaseUtil {
 
     // Read Transaction.
     public Transaction getTransactionByID(String transaction_id) throws SQLException{
-
-
         Connection con = ds.getConnection();
         Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery
@@ -349,8 +346,4 @@ public class DatabaseUtil {
     // Delete User.
     // Delete Account.
     // Delete Transaction
-
-
-
-
 }

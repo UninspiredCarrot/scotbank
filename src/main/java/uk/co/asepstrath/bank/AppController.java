@@ -74,7 +74,7 @@ public class AppController {
 
         try
         {
-            transaction = this.db.readTransactionByID(transaction_id);
+            transaction = this.db.getTransactionByID(transaction_id);
         }
         catch (SQLException e)
         {
