@@ -5,6 +5,39 @@
         <title>Overview Page</title>
     </head>
     <body>
-        <h1>{{name}}: Overview page</h1>
+        <h1>Scot Bank Account overview</h1>
+              <form id='demoForm' style="width:auto">
+                <fieldset>
+                  <legend>Account Breakdown</legend>
+                  <table id='regDetails'>
+
+        <!---------------------------------------------------------------------------------->
+        <!--
+                      The id will be hidden!
+                      shown now for proof of concept
+
+                      The form should be updated when the final transaction object is created
+        -->
+                    <tr>
+                      <td><label for='id'>User ID</label></td>
+                      <td><p id='id'>{{id}}</p></td>
+                    </tr>
+        <!---------------------------------------------------------------------------------->
+
+                    <tr>
+                      <td><label for='name'>Name:</label></td>
+                      <td><p id='name'>{{name}}</p></td>
+                    </tr>
+                    <tr>
+                      <td><label for='balance'>Balance:</label></td>
+                      <td><p id='balance'>£{{balance}}</p></td>
+                    </tr>
+                    <tr>
+                      <td><label for='round_up'>Round up enabled:</label></td>
+                      <td><p id='round_up'>{{round_up}}</p></td>
+                    </tr>
+                  </table>
+                </fieldset>
+                </form>
     </body>
 </html>

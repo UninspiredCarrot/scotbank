@@ -2,6 +2,7 @@ package uk.co.asepstrath.bank;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 
 public class Account {
 
@@ -9,9 +10,9 @@ public class Account {
                     name;
     private double startingBalance;
     private boolean roundUpEnabled;
-
-    public Account (double amount) {
-        startingBalance = amount;
+    private ArrayList<Transaction> transactions;
+    public Account () {
+        startingBalance = 0;
     }
 
     public String getId() {
@@ -22,12 +23,16 @@ public class Account {
         return name;
     }
 
-    public double getStartingBalance() {
+    public double getBalance() {
         return startingBalance;
     }
 
     public boolean isRoundUpEnabled() {
         return roundUpEnabled;
+    }
+
+    public ArrayList<Transaction> getTransactions() {
+        return transactions;
     }
 
     public void setId(String id) { this.id = id; }
@@ -44,6 +49,10 @@ public class Account {
         this.roundUpEnabled = roundUpEnabled;
     }
 
+    public void setTransactions(ArrayList<Transaction> transactions) {
+        this.transactions = transactions;
+    }
+
     public void deposit(double amount) {
         startingBalance += amount;
         startingBalance = round();
@@ -58,9 +67,6 @@ public class Account {
         startingBalance = round();
     }
 
-    public double getBalance() {
-        return startingBalance;
-    }
 
     public double round() {
         BigDecimal rn = new BigDecimal(Double.toString(startingBalance));
@@ -72,8 +78,12 @@ public class Account {
     public String toString(){
         return String
                 .format(
+<<<<<<< 530dfa0bbbb93cadf02aea78cbbc39e827947198
                     "{id: %s}-{name: %s}-{starting balance: %.2f}-{is rounding up enabled: %b}",
-                        this.id, this.name, this.round(), this.roundUpEnabled
+=======
+                    "{id: %s}\n{name: %s}\n{starting balance: %.2f}\n{is rounding up enabled: %b}",
+>>>>>>> 2eb0654b6d549bc54e93338ff9b7c0418d564e79
+                        this.id, this.name, this.startingBalance, this.roundUpEnabled
                 );
     }
 
