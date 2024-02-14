@@ -25,7 +25,7 @@ public class Encryption {
      */
     public boolean verifyPass(byte[] pass, String testPass) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         byte[] inputPass = encrypt(testPass);
-        System.out.println("pass 2 : " + inputPass);
+        //System.out.println("pass 2 : " + inputPass);
         return ( Arrays.equals(pass,inputPass) );
     }
 
