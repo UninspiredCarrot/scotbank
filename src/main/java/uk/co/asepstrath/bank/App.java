@@ -48,8 +48,9 @@ public class App extends Jooby {
         Now we set up our controllers and their dependencies
          */
         DataSource ds = require(DataSource.class);
-
         Logger log = getLog();
+
+        DatabaseUtil.createInstance(ds);
 
         mvc(new ExampleController(ds,log));
         mvc(new AppController(ds, log));
@@ -76,7 +77,7 @@ public class App extends Jooby {
         // Fetch DB Source
         DataSource ds = require(DataSource.class);
         // Database util class
-        DatabaseUtil db_util = new DatabaseUtil(ds);
+        DatabaseUtil db_util = DatabaseUtil.getInstance();
 
         // Open Connection to DB
         try (Connection connection = ds.getConnection()) {

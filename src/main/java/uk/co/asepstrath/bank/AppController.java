@@ -22,7 +22,7 @@ public class AppController {
     public AppController(DataSource ds, Logger log) {
         dataSource = ds;
         logger = log;
-        this.db = new DatabaseUtil(ds);
+        db = DatabaseUtil.getInstance();
     }
 
     @GET

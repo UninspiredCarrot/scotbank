@@ -6,11 +6,21 @@ import java.util.ArrayList;
 
 public class DatabaseUtil {
 
-    private final DataSource ds;
+    private static DataSource ds;
+    private static DatabaseUtil db_util;
 
-    public DatabaseUtil(DataSource ds) {
-        this.ds = ds;
+    private DatabaseUtil() {
+
     }
+
+    public static void createInstance(DataSource dataSource){
+        if(db_util == null) db_util = new DatabaseUtil();
+        ds=dataSource;
+    }
+    public static DatabaseUtil getInstance(){
+        return db_util;
+    }
+
 
     // Create User Entity.
 /*
