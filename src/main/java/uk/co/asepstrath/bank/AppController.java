@@ -14,7 +14,6 @@ import java.awt.print.Book;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,7 +28,7 @@ public class AppController {
     public AppController(DataSource ds, Logger log) {
         dataSource = ds;
         logger = log;
-        this.db = new DatabaseUtil(ds);
+        db = DatabaseUtil.getInstance();
     }
 
     @GET
@@ -40,8 +39,9 @@ public class AppController {
         Map<String, Object> model = new HashMap<>();
         Account acc = new Account();
 
-        try {
-            Statement stmt = this.dataSource.getConnection().createStatement();
+        try
+        {
+            transaction = this.db.getTransactionByID(transaction_id);
 
             String sql = "SELECT * FROM accounts WHERE id = " + id;
 

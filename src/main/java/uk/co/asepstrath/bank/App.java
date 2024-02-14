@@ -51,6 +51,8 @@ public class App extends Jooby {
         DataSource ds = require(DataSource.class);
         Logger log = getLog();
 
+        DatabaseUtil.createInstance(ds);
+
         mvc(new ExampleController(ds,log));
         mvc(new AppController(ds, log));
 
@@ -76,7 +78,7 @@ public class App extends Jooby {
         // Fetch DB Source
         DataSource ds = require(DataSource.class);
         // Database util class
-        DatabaseUtil db_util = new DatabaseUtil(ds);
+        DatabaseUtil db_util = DatabaseUtil.getInstance();
 
         // Open Connection to DB
         try (Connection connection = ds.getConnection()) {
@@ -87,100 +89,90 @@ public class App extends Jooby {
             //-----------------
             //-----------------create the users table-----------------------------------------------
             Statement stmt = connection.createStatement();
-            String sql = (
-                    "CREATE TABLE IF NOT EXISTS `users` (" +
-                        "id VARCHAR(255) PRIMARY KEY," +
-                        "username VARCHAR(255) NOT NULL," +
-                        "password VARCHAR(255) NOT NULL" +
-                    ")"
+            stmt.executeUpdate(
+            "CREATE TABLE IF NOT EXISTS `users` (" +
+                    "id VARCHAR(255) PRIMARY KEY," +
+                    "username VARCHAR(255) NOT NULL," +
+                    "password VARCHAR(255) NOT NULL" +
+                ")"
             );
-            stmt.executeUpdate(sql);
             stmt.close();
             //--------------------------------------------------------------------------------------
 
             //------------create accounts table------------------------------------------------------
-            sql = (
-                    "CREATE TABLE IF NOT EXISTS `accounts` (" +
-                    "id VARCHAR(255) PRIMARY KEY," +
-                    "name VARCHAR(255) NOT NULL," +
-                    "balance DECIMAL NOT NULL," +
-                    "round_up_enabled BIT NOT NULL)"
-                    );
+
             stmt = connection.createStatement();
-            stmt.executeUpdate(sql);
+            stmt.executeUpdate(
+            "CREATE TABLE IF NOT EXISTS `accounts` (" +
+                    "id VARCHAR(255) PRIMARY KEY," +
+                    "`name` VARCHAR(255) NOT NULL," +
+                    "balance DECIMAL NOT NULL," +
+                    "round_up_enabled BIT NOT NULL" +
+                ")"
+            );
             stmt.close();
             //---------------------------------------------------------------------------------------
 
             //-------------------connect accounts and users tables-----------------------------------
-            sql = (
-                    "CREATE TABLE IF NOT EXISTS `user_accounts` (" +
-                            "user_id VARCHAR(255)," +
-                            "account_id VARCHAR(255)," +
-                            "PRIMARY KEY (user_id, account_id)," +
-                            "FOREIGN KEY (user_id) REFERENCES users(id)," +
-                            "FOREIGN KEY (account_id) REFERENCES accounts(id)" +
-                            ")"
-            );
             stmt = connection.createStatement();
-            stmt.executeUpdate(sql);
+            stmt.executeUpdate(
+            "CREATE TABLE IF NOT EXISTS `user_accounts` (" +
+                    "user_id VARCHAR(255)," +
+                    "account_id VARCHAR(255)," +
+                    "PRIMARY KEY (user_id, account_id)," +
+                    "FOREIGN KEY (user_id) REFERENCES users(id)," +
+                    "FOREIGN KEY (account_id) REFERENCES accounts(id)" +
+                ")"
+            );
             stmt.close();
             //---------------------------------------------------------------------------------------
 
             //--------------create transactions table-----------------------------------------------
-            sql = (
-                    "CREATE TABLE IF NOT EXISTS`transactions` (" +
-                            "id VARCHAR(255) PRIMARY KEY,"+
-                            "timestamp VARCHAR(255) NOT NULL,"+
-                            "`to` VARCHAR(255) NOT NULL," +
-                            "amount DECIMAL NOT NULL,"+
-                            "transaction_type VARCHAR(255) NOT NULL"+
-                            ")"
-            );
             stmt = connection.createStatement();
-            stmt.executeUpdate(sql);
+            stmt.executeUpdate(
+            "CREATE TABLE IF NOT EXISTS`transactions` (" +
+                    "id VARCHAR(255) PRIMARY KEY,"+
+                    "`timestamp` VARCHAR(255) NOT NULL,"+
+                    "`to` VARCHAR(255) NOT NULL," +
+                    "`from` VARCHAR(255) NOT NULL," +
+                    "amount DECIMAL NOT NULL,"+
+                    "transaction_type VARCHAR(255) NOT NULL"+
+                ")"
+            );
+            stmt.close();
+            //---------------------------------------------------------------------------------------
+
+            //------------create accounts table-------------------------------------------------------
+            stmt = connection.createStatement();
+            stmt.executeUpdate(
+            "CREATE TABLE IF NOT EXISTS `accounts` (" +
+                    "id VARCHAR(255) PRIMARY KEY," +
+                    "`name` VARCHAR(255) NOT NULL," +
+                    "balance DECIMAL NOT NULL," +
+                    "round_up_enabled BIT NOT NULL" +
+                ")"
+            );
+            stmt.close();
+
+            //---------------------------------------------------------------------------------------
+
+            //-------------------connect user accounts tables----------------------------------------
+            stmt = connection.createStatement();
+            stmt.executeUpdate(
+            "CREATE TABLE IF NOT EXISTS `user_accounts` (" +
+                    "user_id VARCHAR(255)," +
+                    "account_id VARCHAR(255)," +
+                    "PRIMARY KEY (user_id, account_id)," +
+                    "FOREIGN KEY (user_id) REFERENCES users(id)," +
+                    "FOREIGN KEY (account_id) REFERENCES accounts(id)" +
+                ")"
+            );
             stmt.close();
             //---------------------------------------------------------------------------------------
 
             //---------------------------
             // get information from api--
             //---------------------------
-            //------------------Get accounts from api and save to table------------------------------
-
-            //---------------------------------------------------------------------------------------
-
-
-            //------------create accounts table-------------------------------------------------------
-            sql = (
-                    "CREATE TABLE IF NOT EXISTS `accounts` (" +
-                            "id VARCHAR(255) PRIMARY KEY," +
-                            "name VARCHAR(255) NOT NULL," +
-                            "balance DECIMAL NOT NULL," +
-                            "round_up_enabled BIT NOT NULL)"
-            );
-            stmt = connection.createStatement();
-            stmt.executeUpdate(sql);
-            stmt.close();
-
-            //---------------------------------------------------------------------------------------
-
-            //-------------------connect user accounts tables----------------------------------------
-            sql = (
-                    "CREATE TABLE IF NOT EXISTS `user_accounts` (" +
-                            "user_id VARCHAR(255)," +
-                            "account_id VARCHAR(255)," +
-                            "PRIMARY KEY (user_id, account_id)," +
-                            "FOREIGN KEY (user_id) REFERENCES users(id)," +
-                            "FOREIGN KEY (account_id) REFERENCES accounts(id)" +
-                            ")"
-            );
-            stmt = connection.createStatement();
-            stmt.executeUpdate(sql);
-            stmt.close();
-            //---------------------------------------------------------------------------------------
-
-            //-------------
-            // GETTING DATA-
-            //-------------
             //----------------read accounts from the account api-------------------------------------
             HttpResponse<List<Account>> accountResponse =
                     Unirest
@@ -200,6 +192,7 @@ public class App extends Jooby {
 
             NodeList nodeList = doc.getElementsByTagName("results");
 
+            ArrayList<Transaction> transactions = new ArrayList<>();
             for (int i = 0; i < nodeList.getLength(); i++) {
 
                 Node child = nodeList.item(i).getFirstChild();
@@ -208,6 +201,9 @@ public class App extends Jooby {
                 child = child.getNextSibling();
 
                 double amount = Double.parseDouble(child.getFirstChild().getNodeValue());
+                child = child.getNextSibling();
+
+                String from = child.getFirstChild().getNodeValue();
                 child = child.getNextSibling();
 
                 String id = child.getFirstChild().getNodeValue();
@@ -219,12 +215,11 @@ public class App extends Jooby {
                 String type = child.getFirstChild().getNodeValue();
 
                 Transaction transaction = new Transaction(
-                        timestamp, amount, id, to, type
+                        timestamp, amount, id, to, from, type
                 );
-
-                db_util.createTransactionEntity(transaction);
-
+                transactions.add(transaction);
             }
+            db_util.createTransactionEntitiesFromList(transactions);
             //-----------------------------------------------------------------------------------------
 
             //--------------------
@@ -234,31 +229,34 @@ public class App extends Jooby {
             ArrayList<Account> accounts_check = db_util.getAllAccounts();
             ArrayList<Transaction> transactions_check = db_util.getAllTransactions();
 
-            /*{
-              "id":"d2a3fef8-88bd-41da-94cf-4b040c8ab2f9",
-              "name":"Albertha Bergnaum",
-              "startingBalance":133.50,
-              "roundUpEnabled":false
-            }*/
+            /*  "id":"5d85cff3-4792-43fe-9674-173bf7ef5c5c",
+                "name":"Mr. Rickey Upton",
+                "startingBalance":544.04,
+                "roundUpEnabled":false} */
+            System.out.println("-------------------------------------");
             Account account = db_util.getAccountByID(
-                "d2a3fef8-88bd-41da-94cf-4b040c8ab2f9"
+    "25e9b894-c75b-498a-80c6-614942211594"
             );
+            System.out.println(account);
+            System.out.println("-------------------------------------");
 
-            /*<timestamp>2023-04-26 08:43</timestamp>
-            <amount>4916.66</amount>
-            <id>99d85e35-fa9b-4bc8-8897-90eff0da9c94</id>
-            <to>30865231-f0fc-4dc2-b822-6985d06e637d</to>
-            <type>DEPOSI*/
+            /*  <timestamp>2023-04-10 08:43</timestamp>
+                <amount>150.00</amount>
+                <from>25e9b894-c75b-498a-80c6-614942211594</from>
+                <id>50567a98-9ffd-4d53-b75d-4848c4086416</id>
+                <to>SAI</to>
+                <type>PAYMENT</type>    */
+            System.out.println("-------------------------------------");
             Transaction transaction = db_util.getTransactionByID(
-                "2db3ce0c-5623-441a-bf0b-0783e571191a"
+                "50567a98-9ffd-4d53-b75d-4848c4086416"
             );
-
+            System.out.println(transaction);
+            System.out.println("-------------------------------------");
             //TODO: Test insertion and update features in db_util
 
             //TODO: Fix unwanted rounding in the database
 
             //TODO: Test User table once User class has been imported
-            System.out.println("This");
 
 
         } catch (SQLException e) {
