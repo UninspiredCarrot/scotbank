@@ -23,7 +23,7 @@ public class DatabaseUtil {
 
 
     // Create User Entity.
-/*
+
     public void createUserEntity(User user) throws SQLException{
         Connection con = ds.getConnection();
         PreparedStatement prep = con.prepareStatement(
@@ -39,7 +39,7 @@ public class DatabaseUtil {
         prep.close();
         con.close();
     }
-*/
+
     // Create Account Entity.
     public void createAccountEntity(Account account, String user_id) throws SQLException {
         Connection con = ds.getConnection();
