@@ -13,6 +13,7 @@ public class User {
     public void addAccount(Account account){
         accounts.add(account);
     }
+
     public void removeAccount(Account account){
         accounts.remove(account);
     }
@@ -21,19 +22,22 @@ public class User {
         return accounts.size();
     }
 
+    public int getId(){return id;}
+
     public ArrayList<Account> getAccounts(){
-        ArrayList<Account> output = new ArrayList<Account>();
-        for(int i = 0; i < accounts.size(); i++){
-            output.add(accounts.get(i));
-        }
-        return output;
+        return accounts;
     }
+
+    public void setAccounts(ArrayList<Account> accounts){this.accounts = accounts;}
+
     public String getName(){
         return name;
     }
     public void setName(String input){
         name = input;
     }
+
+    public void setId(int id) {this.id = id;}
 
     public String getPassword(){
         return password;

@@ -35,6 +35,7 @@ public class Transaction {
     public String getTo() {
         return to;
     }
+
     public String getFrom(){return from;}
 
     public String getTransaction_type() {
@@ -65,6 +66,7 @@ public class Transaction {
 
     @Override
     public String toString(){
+
         return String.format(
                 "{id: %s}\n{timestamp: %s}\n{to: %s}\n{from: %s}-\n{amount: %.2f}-\n{transaction type: %s}",
                 this.id, this.timestamp, this.to, this.from, this.amount,this.transaction_type

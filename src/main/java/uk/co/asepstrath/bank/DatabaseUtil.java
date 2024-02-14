@@ -23,7 +23,7 @@ public class DatabaseUtil {
 
 
     // Create User Entity.
-/*
+
     public void createUserEntity(User user) throws SQLException{
         Connection con = ds.getConnection();
         PreparedStatement prep = con.prepareStatement(
@@ -32,14 +32,14 @@ public class DatabaseUtil {
             ")VALUES(?,?,?)"
         );
 
-        prep.setString(1, user.getId());
+        prep.setInt(1, user.getId());
         prep.setString(2, user.getName());
         prep.setString(3, user.getPassword());
         prep.executeUpdate();
         prep.close();
         con.close();
     }
-*/
+
     // Create Account Entity.
     public void createAccountEntity(Account account, String user_id) throws SQLException {
         Connection con = ds.getConnection();
@@ -151,7 +151,7 @@ public class DatabaseUtil {
 
 
     // Read User.
-/*
+
     public User getUserByID(String user_id) throws SQLException{
         Connection con = ds.getConnection();
         Statement stmt = con.createStatement();
@@ -162,10 +162,10 @@ public class DatabaseUtil {
         rs.next();
 
         User user = new User();
-        user.setId(rs.getString("id"));
+        user.setId(rs.getInt("id"));
         user.setPassword(rs.getString("password"));
         user.setName(rs.getString("username"));
-        user.setAccounts(getAccountsByUser(user_id));
+        user.setAccounts(getAccountsByUser(user.getId()));
 
         rs.close();
         stmt.close();
@@ -173,10 +173,10 @@ public class DatabaseUtil {
 
         return user;
     }
-*/
+
 
     // Read Users.
-/*
+
     public ArrayList<User> getAllUsers() throws SQLException{
         Connection con = ds.getConnection();
         Statement stmt = con.createStatement();
@@ -188,7 +188,7 @@ public class DatabaseUtil {
 
         while(rs.next()){
             User user = new User();
-            user.setId(rs.getString("id"));
+            user.setId(rs.getInt("id"));
             user.setPassword(rs.getString("password"));
             user.setName(rs.getString("username"));
             user.setAccounts(getAccountsByUser(user.getId()));
@@ -201,7 +201,7 @@ public class DatabaseUtil {
 
         return users;
     }
-*/
+
     public boolean checkUsernameExists(String username) throws SQLException{
         Connection con = ds.getConnection();
         Statement stmt = con.createStatement();
@@ -272,7 +272,7 @@ public class DatabaseUtil {
     }
 
     // Read User Account
-    public ArrayList<Account> getAccountsByUser(String user_id) throws SQLException{
+    public ArrayList<Account> getAccountsByUser(int user_id) throws SQLException{
 
         ArrayList<Account> accounts = new ArrayList<>();
         ArrayList<String> account_ids = new ArrayList<>();
@@ -280,7 +280,7 @@ public class DatabaseUtil {
         Connection con = ds.getConnection();
         Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery(
-                "SELECT * FROM user_accounts WHERE user_id \'"+user_id+"\'"
+                "SELECT * FROM user_accounts WHERE user_id "+user_id+""
         );
         while(rs.next()){
             account_ids.add(rs.getString("account_id"));

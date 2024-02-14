@@ -17,6 +17,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 @Path("/bank")
 public class AppController {
@@ -42,18 +43,7 @@ public class AppController {
 
         try
         {
-            transaction = this.db.getTransactionByID(transaction_id);
-
-            String sql = "SELECT * FROM accounts WHERE id = " + id;
-
-            ResultSet rs = stmt.executeQuery(sql);
-
-            rs.next();
-            acc = new Account();
-            acc.setId(rs.getString("id"));
-            acc.setName(rs.getString("name"));
-            acc.deposit(rs.getDouble("balance"));
-            acc.setRoundUpEnabled(rs.getBoolean("round_up_enabled"));
+            acc = db.getAccountByID(id);
 
         } catch (SQLException e) {
             logger.error("Database Error Occurred",e);
@@ -65,6 +55,14 @@ public class AppController {
         model.put("balance", acc.getBalance());
         model.put("round_up", acc.isRoundUpEnabled());
         return new ModelAndView("overview.hbs", model);
+    }
+
+    @GET("/login")
+    public ModelAndView login() {
+        // we must create a model to pass to the "login" template
+        Map<String, Object> model = new HashMap<>();
+
+        return new ModelAndView("login.hbs", model);
     }
 
     @GET("/view_transaction")
