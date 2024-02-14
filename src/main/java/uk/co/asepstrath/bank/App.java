@@ -82,7 +82,7 @@ public class App extends Jooby {
 
         // Open Connection to DB
         try (Connection connection = ds.getConnection()) {
-            
+
             //-----------------
             // CREATING TABLES-
             //-----------------
@@ -90,7 +90,7 @@ public class App extends Jooby {
             Statement stmt = connection.createStatement();
             stmt.executeUpdate(
             "CREATE TABLE IF NOT EXISTS `users` (" +
-                    "id VARCHAR(255) PRIMARY KEY," +
+                    "id Decimal PRIMARY KEY," +
                     "username VARCHAR(255) NOT NULL," +
                     "password VARCHAR(255) NOT NULL" +
                 ")"
