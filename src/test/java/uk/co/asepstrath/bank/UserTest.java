@@ -1,6 +1,5 @@
 package uk.co.asepstrath.bank;
 
-import org.junit.jupiter.api.Assertions;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.ArrayList;
 import org.junit.jupiter.api.Test;
@@ -30,20 +29,19 @@ public class UserTest {
     @Test
     public void addIds(){
         User a = new User();
-        a.addId("test");
-        a.addId("test2");
-        assertTrue(a.idsLength() == 2);
+        Account b = new Account();
+        Account c = new Account();
+        a.addAccount(b);
+        a.addAccount(c);
+        assertTrue(a.accountsLength() == 2);
     }
 
     @Test
-    public void getIds(){
-        ArrayList<String> temp = new ArrayList<>();
-        temp.add("test");
-        temp.add("test2");
+    public void getAccounts(){
         User a = new User();
-        a.addId("test");
-        a.addId("test2");
-        assertTrue(temp.equals(a.getIds()));
+        Account b = new Account();
+        a.addAccount(b);
+        assertTrue(b.equals(a.getAccounts().get(0)));
 
 
     }

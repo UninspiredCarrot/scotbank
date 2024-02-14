@@ -1,29 +1,30 @@
 package uk.co.asepstrath.bank;
 import java.util.ArrayList;
 public class User {
+    private int id;
     private String name,password;
-    private ArrayList<String> ids;
+    private ArrayList<Account> accounts;
     public User () {
-        this.ids = new ArrayList<>();
+        this.accounts = new ArrayList<>();
         this.name = "";
         this.password = "";
     }
 
-    public void addId(String id){
-        ids.add(id);
+    public void addAccount(Account account){
+        accounts.add(account);
     }
-    public void removeId(String id){
-        ids.remove(id);
-    }
-
-    public int idsLength() {
-        return ids.size();
+    public void removeAccount(Account account){
+        accounts.remove(account);
     }
 
-    public ArrayList<String> getIds(){
-        ArrayList<String> output = new ArrayList<String>();
-        for(int i = 0; i < ids.size();i++){
-            output.add(ids.get(i));
+    public int accountsLength() {
+        return accounts.size();
+    }
+
+    public ArrayList<Account> getAccounts(){
+        ArrayList<Account> output = new ArrayList<Account>();
+        for(int i = 0; i < accounts.size(); i++){
+            output.add(accounts.get(i));
         }
         return output;
     }
