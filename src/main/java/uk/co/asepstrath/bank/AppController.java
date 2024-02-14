@@ -4,9 +4,15 @@ import io.jooby.ModelAndView;
 import io.jooby.StatusCode;
 import io.jooby.annotation.*;
 import io.jooby.exception.StatusCodeException;
+import kong.unirest.core.HttpResponse;
+import kong.unirest.core.JsonNode;
+import kong.unirest.core.Unirest;
 import org.slf4j.Logger;
 
 import javax.sql.DataSource;
+import java.awt.print.Book;
+import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,10 +35,34 @@ public class AppController {
     public String welcome() { return "Welcome to Scotbank! "; }
 
     @GET("/overview")
-    public ModelAndView overview(@QueryParam String uuid) {
+    public ModelAndView overview(@QueryParam String id) {
         Map<String, Object> model = new HashMap<>();
-        model.put("name", uuid);
+        Account acc = new Account();
 
+        try
+        {
+            transaction = this.db.getTransactionByID(transaction_id);
+
+            String sql = "SELECT * FROM accounts WHERE id = " + id;
+
+            ResultSet rs = stmt.executeQuery(sql);
+
+            rs.next();
+            acc = new Account();
+            acc.setId(rs.getString("id"));
+            acc.setName(rs.getString("name"));
+            acc.deposit(rs.getDouble("balance"));
+            acc.setRoundUpEnabled(rs.getBoolean("round_up_enabled"));
+
+        } catch (SQLException e) {
+            logger.error("Database Error Occurred",e);
+            throw new StatusCodeException(StatusCode.SERVER_ERROR, "Database Error Occurred");
+        }
+
+        model.put("id", acc.getId());
+        model.put("name", acc.getName());
+        model.put("balance", acc.getBalance());
+        model.put("round_up", acc.isRoundUpEnabled());
         return new ModelAndView("overview.hbs", model);
     }
 
@@ -45,7 +75,6 @@ public class AppController {
         try
         {
             transaction = this.db.getTransactionByID(transaction_id);
-
         }
         catch (SQLException e)
         {
