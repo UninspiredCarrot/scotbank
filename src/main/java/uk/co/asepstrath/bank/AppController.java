@@ -41,18 +41,7 @@ public class AppController {
 
         try
         {
-            transaction = this.db.getTransactionByID(transaction_id);
-
-            String sql = "SELECT * FROM accounts WHERE id = " + id;
-
-            ResultSet rs = stmt.executeQuery(sql);
-
-            rs.next();
-            acc = new Account();
-            acc.setId(rs.getString("id"));
-            acc.setName(rs.getString("name"));
-            acc.deposit(rs.getDouble("balance"));
-            acc.setRoundUpEnabled(rs.getBoolean("round_up_enabled"));
+            acc = db.getAccountByID(id);
 
         } catch (SQLException e) {
             logger.error("Database Error Occurred",e);

@@ -78,11 +78,7 @@ public class Account {
     public String toString(){
         return String
                 .format(
-<<<<<<< 530dfa0bbbb93cadf02aea78cbbc39e827947198
-                    "{id: %s}-{name: %s}-{starting balance: %.2f}-{is rounding up enabled: %b}",
-=======
                     "{id: %s}\n{name: %s}\n{starting balance: %.2f}\n{is rounding up enabled: %b}",
->>>>>>> 2eb0654b6d549bc54e93338ff9b7c0418d564e79
                         this.id, this.name, this.startingBalance, this.roundUpEnabled
                 );
     }

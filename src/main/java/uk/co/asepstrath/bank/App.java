@@ -109,31 +109,7 @@ public class App extends Jooby {
                     "balance DECIMAL NOT NULL," +
                     "round_up_enabled BIT NOT NULL)"
                     );
-            stmt.executeUpdate(sql);
 
-            HttpResponse<Account[]> accountResponse =
-                    Unirest
-                    .get("https://api.asep-strath.co.uk/api/accounts")
-                    .asObject(Account[].class);
-
-            for(Account account : accountResponse.getBody()){
-                sql = (
-                    "INSERT INTO accounts (" +
-                    "id, name, balance, round_up_enabled" +
-                    ")VALUES (?,?,?,?);"
-                );
-                prep = connection.prepareStatement(sql);
-                prep.setString(1, account.getId());
-                prep.setString(2, account.getName());
-                prep.setDouble(3, account.getBalance());
-                prep.setBoolean(4, account.isRoundUpEnabled());
-                prep.executeUpdate();
-//                log.info(
-//                        String.format(
-//                                "{%s} - added to database", account
-//                        )
-//                );
-            }
             //---------------------------------------------------------------------------------------
 
             //-------------------connect accounts and users tables-----------------------------------
