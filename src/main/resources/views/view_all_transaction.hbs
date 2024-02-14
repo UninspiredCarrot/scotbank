@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Scotbank - All transaction</title>
+</head>
+<body>
+{{#Transaction}}
+    <form id='demoForm' style="width:auto">
+        <fieldset>
+            <legend>Transaction Breakdown</legend>
+            <table id='regDetails'>
+
+                <!---------------------------------------------------------------------------------->
+                <!--
+                              The id will be hidden!
+                              shown now for proof of concept
+
+                              The form should be updated when the final transaction object is created
+                -->
+                <tr>
+                    <td><label for='id'>Transaction ID</label></td>
+                    <td><p id='id'>{{ID}}</p></td>
+                </tr>
+                <!---------------------------------------------------------------------------------->
+
+                <tr>
+                    <td><label for='timestamp'>Timestamp:</label></td>
+                    <td><p id='timestamp'>{{timestamp}}</p></td>
+                </tr>
+                <tr>
+                    <td><label for='transaction_type'>Transaction Type:</label></td>
+                    <td><p id='transaction_type'>{{transaction_type}}</p></td>
+                </tr>
+
+                <tr>
+                    <td><label for='to'>Sent To:</label></td>
+                    <td><p id='to'>{{to}}</p></td>
+                </tr>
+
+                <tr>
+                    <td><label for='transaction_amount'>Transaction Amount:</label></td>
+                    <td><p  id='transaction_amount'>£{{amount}}</p></td>
+                </tr>
+
+            </table>
+        </fieldset>
+    </form>
+{{/Transaction}}
+
+</body>
+</html>
