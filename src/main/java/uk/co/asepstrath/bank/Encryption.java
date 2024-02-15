@@ -29,16 +29,4 @@ public class Encryption {
         return ( Arrays.equals(pass,inputPass) );
     }
 
-    /*@Test
-    public void passwordTest() throws NoSuchAlgorithmException, UnsupportedEncodingException {
-        String pass1 = "password123";
-        String pass2 = "password123";
-        String pass3 = "pafghjbknlm4567";
-        System.out.println("Before : " +pass1);
-        System.out.println("After : " + encrypt(pass1));
-
-        assertEquals(true, Arrays.equals(encrypt(pass1), encrypt(pass2)));
-        assertEquals(false, verifyPass(encrypt(pass1), pass3));
-        assertEquals(true, verifyPass(encrypt(pass1), pass2));
-    }*/
 }

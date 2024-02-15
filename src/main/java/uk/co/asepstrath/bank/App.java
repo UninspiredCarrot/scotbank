@@ -54,7 +54,7 @@ public class App extends Jooby {
         DatabaseUtil.createInstance(ds);
 
         mvc(new ExampleController(ds,log));
-        mvc(new AppController(ds, log));
+        mvc(new AppController(log));
 
         /*
         Finally we register our application lifecycle methods
@@ -80,117 +80,21 @@ public class App extends Jooby {
         // Database util class
         DatabaseUtil db_util = DatabaseUtil.getInstance();
 
-        // Open Connection to DB
-        try (Connection connection = ds.getConnection()) {
+        // CREATE TABLES AND GET API DATA
+        try{
+            DatabaseUtil.createDatabase();
+            DatabaseUtil.fetchDataFromAPI();
+        }catch (SQLException e) {
+            log.error("Database Creation Error",e);
+        } catch (ParserConfigurationException e) {
+            log.error("Parser Configuration Error", e);
+        } catch (IOException e){
+            log.error("I/O Error", e);
+        } catch (SAXException e){
+            log.error("SAX Error", e);
+        }
 
-            //-----------------
-            // CREATING TABLES-
-            //-----------------
-            //-----------------create the users table-----------------------------------------------
-            Statement stmt = connection.createStatement();
-            stmt.executeUpdate(
-            "CREATE TABLE IF NOT EXISTS `users` (" +
-                    "id Decimal PRIMARY KEY," +
-                    "username VARCHAR(255) NOT NULL," +
-                    "password VARCHAR(255) NOT NULL" +
-                ")"
-            );
-            stmt.close();
-            //--------------------------------------------------------------------------------------
-
-            //------------create accounts table------------------------------------------------------
-
-            stmt = connection.createStatement();
-            stmt.executeUpdate(
-            "CREATE TABLE IF NOT EXISTS `accounts` (" +
-                    "id VARCHAR(255) PRIMARY KEY," +
-                    "`name` VARCHAR(255) NOT NULL," +
-                    "balance DECIMAL NOT NULL," +
-                    "round_up_enabled BIT NOT NULL)"
-                    );
-
-            //---------------------------------------------------------------------------------------
-
-            //-------------------connect accounts and users tables-----------------------------------
-            stmt = connection.createStatement();
-            stmt.executeUpdate(
-            "CREATE TABLE IF NOT EXISTS `user_accounts` (" +
-                    "user_id VARCHAR(255)," +
-                    "account_id VARCHAR(255)," +
-                    "PRIMARY KEY (user_id, account_id)," +
-                    "FOREIGN KEY (user_id) REFERENCES users(id)," +
-                    "FOREIGN KEY (account_id) REFERENCES accounts(id)" +
-                ")"
-            );
-            stmt.close();
-            //---------------------------------------------------------------------------------------
-
-            //--------------create transactions table-----------------------------------------------
-            stmt = connection.createStatement();
-            stmt.executeUpdate(
-            "CREATE TABLE IF NOT EXISTS`transactions` (" +
-                    "id VARCHAR(255) PRIMARY KEY,"+
-                    "`timestamp` VARCHAR(255) NOT NULL,"+
-                    "`to` VARCHAR(255) NOT NULL," +
-                    "`from` VARCHAR(255) NOT NULL," +
-                    "amount DECIMAL NOT NULL,"+
-                    "transaction_type VARCHAR(255) NOT NULL"+
-                ")"
-            );
-            stmt.close();
-            //---------------------------------------------------------------------------------------
-
-            //---------------------------
-            // get information from api--
-            //---------------------------
-            //----------------read accounts from the account api-------------------------------------
-            HttpResponse<List<Account>> accountResponse =
-                    Unirest
-                            .get("https://api.asep-strath.co.uk/api/accounts")
-                            .asObject(new GenericType<>(){});
-
-                db_util.createAccountEntitiesFromList((ArrayList<Account>)accountResponse.getBody());
-            //---------------------------------------------------------------------------------------
-
-            //-----------------Get transaction information from api and save to data base------------
-
-            URL url = new URL("https://api.asep-strath.co.uk/api/transactions");
-            DocumentBuilderFactory doc_builder_fact = DocumentBuilderFactory.newInstance();
-            DocumentBuilder doc_builder = doc_builder_fact.newDocumentBuilder();
-            Document doc = doc_builder.parse(new InputSource(url.openStream()));
-            doc.getDocumentElement().normalize();
-
-            NodeList nodeList = doc.getElementsByTagName("results");
-
-            ArrayList<Transaction> transactions = new ArrayList<>();
-            for (int i = 0; i < nodeList.getLength(); i++) {
-
-                Node child = nodeList.item(i).getFirstChild();
-
-                String timestamp = child.getFirstChild().getNodeValue();
-                child = child.getNextSibling();
-
-                double amount = Double.parseDouble(child.getFirstChild().getNodeValue());
-                child = child.getNextSibling();
-
-                String from = child.getFirstChild().getNodeValue();
-                child = child.getNextSibling();
-
-                String id = child.getFirstChild().getNodeValue();
-                child = child.getNextSibling();
-
-                String to = child.getFirstChild().getNodeValue();
-                child = child.getNextSibling();
-
-                String type = child.getFirstChild().getNodeValue();
-
-                Transaction transaction = new Transaction(
-                        timestamp, amount, id, to, from, type
-                );
-                transactions.add(transaction);
-            }
-            db_util.createTransactionEntitiesFromList(transactions);
-            //-----------------------------------------------------------------------------------------
+        try{
 
             //--------------------
             //----Test Databases--
@@ -231,8 +135,6 @@ public class App extends Jooby {
 
         } catch (SQLException e) {
             log.error("Database Creation Error",e);
-        } catch (ParserConfigurationException | IOException | SAXException e) {
-            throw new RuntimeException(e);
         }
     }
 

@@ -1,48 +1,98 @@
 package uk.co.asepstrath.bank;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.ArrayList;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class UserTest {
     @Test
     public void createUser(){
-        User a = new User();
-        assertTrue(a != null);
-    }
-    @Test
-    public void getUser(){
-        User a = new User();
-        assertTrue(a.getName() != null);
-        assertTrue(a.getPassword() != null);
+        User user = new User();
+        assertNotNull(user);
     }
 
     @Test
-    public void setUser(){
-        User a = new User();
-        a.setName("Tom");
-        a.setPassword("Jerry");
-        assertTrue(a.getName() == "Tom");
-        assertTrue(a.getPassword() == "Jerry");
+    public void createUserFullConstructor(){
+        User user = new User(
+                1,
+                "John",
+                "password",
+                new ArrayList<>()
+        );
+        assertEquals(1, user.getId());
+        assertEquals("John", user.getName());
+        assertEquals("password", user.getPassword());
+        assertNotNull(user.getAccounts());
     }
 
     @Test
-    public void addIds(){
-        User a = new User();
-        Account b = new Account();
-        Account c = new Account();
-        a.addAccount(b);
-        a.addAccount(c);
-        assertTrue(a.accountsLength() == 2);
+    public void testUserSettersGetters(){
+        User user = new User();
+        user.setId(1);
+        user.setName("Tom");
+        user.setPassword("Jerry");
+
+        assertSame("Tom", user.getName());
+        assertSame("Jerry", user.getPassword());
+        assertSame(1, user.getId());
+
+        ArrayList<Account> accounts = new ArrayList<>();
+        accounts.add(new Account());
+        accounts.add(new Account());
+
+        assertTrue(user.getAccounts().isEmpty());
+        user.setAccounts(accounts);
+        assertFalse(user.getAccounts().isEmpty());
+    }
+
+    @Test
+    public void addAccounts(){
+        User user = new User();
+        Account account1 = new Account();
+        Account account2 = new Account();
+        user.addAccount(account1);
+        user.addAccount(account2);
+        assertEquals(2, user.accountsLength());
     }
 
     @Test
     public void getAccounts(){
-        User a = new User();
-        Account b = new Account();
-        a.addAccount(b);
-        assertTrue(b.equals(a.getAccounts().get(0)));
-
-
+        User user = new User();
+        Account account = new Account();
+        user.addAccount(account);
+        assertEquals(account, user.getAccounts().get(0));
     }
+
+    @Test
+    public void testAddAccount(){
+        User user = new User();
+        assertTrue(user.getAccounts().isEmpty());
+        Account account = new Account();
+        user.addAccount(account);
+        assertFalse(user.getAccounts().isEmpty());
+    }
+    @Test
+    public void testRemoveAccount(){
+        User user = new User();
+        Account account = new Account();
+        user.addAccount(account);
+        assertFalse(user.getAccounts().isEmpty());
+        user.removeAccount(account);
+        assertTrue(user.getAccounts().isEmpty());
+    }
+
+    @Test
+    public void testGetAccountSize(){
+        User user = new User();
+        Account account1 = new Account();
+        Account account2 = new Account();
+        Account account3 = new Account();
+        user.addAccount(account1);
+        user.addAccount(account2);
+        user.addAccount(account3);
+
+        assertEquals(3, user.getAccounts().size());
+    }
+
 }

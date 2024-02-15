@@ -10,6 +10,13 @@ public class User {
         this.password = "";
     }
 
+    public User(int id, String name, String password, ArrayList<Account> accounts) {
+        this.id = id;
+        this.name = name;
+        this.password = password;
+        this.accounts = accounts;
+    }
+
     public void addAccount(Account account){
         accounts.add(account);
     }
