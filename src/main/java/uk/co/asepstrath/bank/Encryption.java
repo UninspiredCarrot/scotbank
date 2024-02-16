@@ -1,14 +1,10 @@
 package uk.co.asepstrath.bank;
 
-//import org.junit.Test;
-
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-
-//import static org.junit.Assert.assertEquals;
 
 public class Encryption {
     public byte[] encrypt(String pass) throws NoSuchAlgorithmException, UnsupportedEncodingException {
