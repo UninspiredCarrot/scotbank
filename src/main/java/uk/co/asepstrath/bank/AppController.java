@@ -69,20 +69,31 @@ public class AppController {
     public ModelAndView loginPost(String username, String password) {
         // we must create a model to pass to the "login" template
         Encryption encryption = new Encryption();
-
-        String hashed_password;
+        DatabaseUtil connection = DatabaseUtil.getInstance();
+        boolean username_match = false, password_match = false;
+        User user = null;
 
         try {
-            hashed_password = encryption.encrypt(password).toString();
+            username_match = connection.checkUsernameExists(username);
+            if(username_match){
+                password_match = connection.comparePassword(
+                        username,
+                        Arrays.toString(encryption.encrypt(password))
+                );
+            }
+            if(username_match && password_match){
+                user = connection.getUserByUsername(username);
+            }
+
         } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
+            logger.error("Encryption Error :" + e);
+        } catch (SQLException e){
+            logger.error("SQL Exception :" + e);
         }
-
-        User user = new User();
-        user.setPassword(hashed_password);
-        user.setName(username);
-
-        return new ModelAndView("login.hbs", new HashMap<>());
+        if(user == null)
+            return new ModelAndView("login.hbs", new HashMap<>());
+        else
+            return new ModelAndView("/bank", new HashMap<>());
     }
 
     @GET("/view_transaction")
