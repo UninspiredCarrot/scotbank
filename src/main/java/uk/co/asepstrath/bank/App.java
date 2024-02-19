@@ -119,7 +119,7 @@ public class App extends Jooby {
             user.setName("user");
             user.setAccounts(accounts);
             try {
-                user.setPassword(encryption.encrypt("Password!").toString());
+                user.setPassword(new String(encryption.encrypt("Password!")));
             } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
                 throw new RuntimeException(e);
             }

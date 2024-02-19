@@ -2,6 +2,7 @@ package uk.co.asepstrath.bank;
 
 import ch.qos.logback.core.model.Model;
 import io.jooby.ModelAndView;
+import io.jooby.Router;
 import io.jooby.StatusCode;
 import io.jooby.annotation.*;
 import io.jooby.exception.StatusCodeException;
@@ -66,7 +67,7 @@ public class AppController {
     }
 
     @POST("/login")
-    public ModelAndView loginPost(String username, String password) {
+    public String loginPost(String username, String password) {
         // we must create a model to pass to the "login" template
         Encryption encryption = new Encryption();
         DatabaseUtil connection = DatabaseUtil.getInstance();
@@ -76,9 +77,10 @@ public class AppController {
         try {
             username_match = connection.checkUsernameExists(username);
             if(username_match){
+                String hashed_password = new String(encryption.encrypt(password));
                 password_match = connection.comparePassword(
                         username,
-                        Arrays.toString(encryption.encrypt(password))
+                        new String(encryption.encrypt(password))
                 );
             }
             if(username_match && password_match){
@@ -91,9 +93,9 @@ public class AppController {
             logger.error("SQL Exception :" + e);
         }
         if(user == null)
-            return new ModelAndView("login.hbs", new HashMap<>());
+            return "http://localhost:8080/bank/login";
         else
-            return new ModelAndView("/bank", new HashMap<>());
+            return "http://localhost:8080/bank/welcome";
     }
 
     @GET("/view_transaction")
