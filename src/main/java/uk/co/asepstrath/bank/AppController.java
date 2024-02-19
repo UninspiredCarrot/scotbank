@@ -93,9 +93,9 @@ public class AppController {
             logger.error("SQL Exception :" + e);
         }
         if(user == null)
-            return "http://localhost:8080/bank/login";
+            return "LOGIN FAIL";
         else
-            return "http://localhost:8080/bank/welcome";
+            return "LOGIN SUCCESS";
     }
 
     @GET("/view_transaction")
