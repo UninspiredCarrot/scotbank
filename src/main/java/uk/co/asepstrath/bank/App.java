@@ -1,14 +1,7 @@
 package uk.co.asepstrath.bank;
 
-import kong.unirest.core.GenericType;
-import kong.unirest.core.HttpResponse;
-import kong.unirest.core.Unirest;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import uk.co.asepstrath.bank.example.ExampleController;
+//import uk.co.asepstrath.bank.example.ExampleController;
 import io.jooby.Jooby;
 import io.jooby.handlebars.HandlebarsModule;
 import io.jooby.helper.UniRestExtension;
@@ -16,17 +9,12 @@ import io.jooby.hikari.HikariModule;
 import org.slf4j.Logger;
 
 import javax.sql.DataSource;
-import javax.xml.crypto.Data;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
-import java.net.URL;
-import java.sql.Connection;
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.List;
 
 public class App extends Jooby {
 
@@ -53,14 +41,14 @@ public class App extends Jooby {
 
         DatabaseUtil.createInstance(ds);
 
-        mvc(new ExampleController(ds,log));
+//        mvc(new ExampleController(ds,log));
         mvc(new AppController(log));
 
         /*
         Finally we register our application lifecycle methods
          */
-        onStarted(() -> onStart());
-        onStop(() -> onStop());
+        onStarted(this::onStart);
+        onStop(this::onStop);
     }
 
     public static void main(final String[] args) {
@@ -100,9 +88,6 @@ public class App extends Jooby {
             //----Test Databases--
             //--------------------
 
-            ArrayList<Account> accounts_check = db_util.getAllAccounts();
-            ArrayList<Transaction> transactions_check = db_util.getAllTransactions();
-
             /*  "id":"5d85cff3-4792-43fe-9674-173bf7ef5c5c",
                 "name":"Mr. Rickey Upton",
                 "startingBalance":544.04,
@@ -126,12 +111,37 @@ public class App extends Jooby {
             );
             System.out.println(transaction);
             System.out.println("-------------------------------------");
-            //TODO: Test insertion and update features in db_util
 
-            //TODO: Fix unwanted rounding in the database
+            Encryption encryption = new Encryption();
+            ArrayList<Account> accounts = new ArrayList<>();
+            accounts.add(account);
+            User user = new User();
+            user.setName("user");
+            user.setAccounts(accounts);
+            try {
+                user.setPassword(encryption.encrypt("Password!").toString());
+            } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
 
-            //TODO: Test User table once User class has been imported
+            user.addAccount(new Account(db_util.createTransactionId(), "Jane Doe", 500, false));
 
+            db_util.createUserEntity(new User("user1", "was", new ArrayList<>()));
+            db_util.createUserEntity(new User("user2", "tes", new ArrayList<>()));
+            if(!db_util.checkUsernameExists(user.getName()))
+                db_util.createUserEntity(user);
+            if(!db_util.checkUsernameExists(user.getName()))
+                db_util.createUserEntity(user);
+
+            ArrayList<Account> accounts_check = db_util.getAllAccounts();
+            ArrayList<Transaction> transactions_check = db_util.getAllTransactions();
+            ArrayList<User> users_check = db_util.getAllUsers();
+
+            user.setName("JaneDoe");
+            db_util.updateUser(user.getId(), user);
+            User user_check_id = db_util.getUserByID(user.getId());
+
+            System.out.println(user);
 
         } catch (SQLException e) {
             log.error("Database Creation Error",e);

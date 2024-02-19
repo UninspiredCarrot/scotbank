@@ -1,5 +1,6 @@
 package uk.co.asepstrath.bank;
 
+import ch.qos.logback.core.model.Model;
 import io.jooby.ModelAndView;
 import io.jooby.StatusCode;
 import io.jooby.annotation.*;
@@ -11,9 +12,12 @@ import org.slf4j.Logger;
 
 import javax.sql.DataSource;
 import java.awt.print.Book;
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -57,9 +61,28 @@ public class AppController {
     @GET("/login")
     public ModelAndView login() {
         // we must create a model to pass to the "login" template
-        Map<String, Object> model = new HashMap<>();
 
-        return new ModelAndView("login.hbs", model);
+        return new ModelAndView("login.hbs", new HashMap<>());
+    }
+
+    @POST("/login")
+    public ModelAndView loginPost(String username, String password) {
+        // we must create a model to pass to the "login" template
+        Encryption encryption = new Encryption();
+
+        String hashed_password;
+
+        try {
+            hashed_password = encryption.encrypt(password).toString();
+        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+
+        User user = new User();
+        user.setPassword(hashed_password);
+        user.setName(username);
+
+        return new ModelAndView("login.hbs", new HashMap<>());
     }
 
     @GET("/view_transaction")

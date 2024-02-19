@@ -2,12 +2,14 @@ package uk.co.asepstrath.bank;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import io.jooby.test.JoobyTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 
+@JoobyTest(App.class)
 public class AccountTests {
 
     Account account;

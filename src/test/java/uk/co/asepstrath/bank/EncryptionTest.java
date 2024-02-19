@@ -1,5 +1,6 @@
 package uk.co.asepstrath.bank;
 
+import io.jooby.test.JoobyTest;
 import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
@@ -7,6 +8,7 @@ import java.security.NoSuchAlgorithmException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@JoobyTest(App.class)
 public class EncryptionTest {
     Encryption encrypt = new Encryption();
     @Test

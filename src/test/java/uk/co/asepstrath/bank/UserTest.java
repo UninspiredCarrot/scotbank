@@ -1,10 +1,13 @@
 package uk.co.asepstrath.bank;
 
 import java.util.ArrayList;
+
+import io.jooby.test.JoobyTest;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@JoobyTest(App.class)
 public class UserTest {
     @Test
     public void createUser(){
