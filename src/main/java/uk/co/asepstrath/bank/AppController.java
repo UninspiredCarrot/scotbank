@@ -2,6 +2,7 @@ package uk.co.asepstrath.bank;
 
 import ch.qos.logback.core.model.Model;
 import io.jooby.ModelAndView;
+import io.jooby.Router;
 import io.jooby.StatusCode;
 import io.jooby.annotation.*;
 import io.jooby.exception.StatusCodeException;
@@ -66,23 +67,35 @@ public class AppController {
     }
 
     @POST("/login")
-    public ModelAndView loginPost(String username, String password) {
+    public String loginPost(String username, String password) {
         // we must create a model to pass to the "login" template
         Encryption encryption = new Encryption();
-
-        String hashed_password;
+        DatabaseUtil connection = DatabaseUtil.getInstance();
+        boolean username_match = false, password_match = false;
+        User user = null;
 
         try {
-            hashed_password = encryption.encrypt(password).toString();
+            username_match = connection.checkUsernameExists(username);
+            if(username_match){
+                String hashed_password = new String(encryption.encrypt(password));
+                password_match = connection.comparePassword(
+                        username,
+                        new String(encryption.encrypt(password))
+                );
+            }
+            if(username_match && password_match){
+                user = connection.getUserByUsername(username);
+            }
+
         } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
+            logger.error("Encryption Error :" + e);
+        } catch (SQLException e){
+            logger.error("SQL Exception :" + e);
         }
-
-        User user = new User();
-        user.setPassword(hashed_password);
-        user.setName(username);
-
-        return new ModelAndView("login.hbs", new HashMap<>());
+        if(user == null)
+            return "http://localhost:8080/bank/login";
+        else
+            return "http://localhost:8080/bank/welcome";
     }
 
     @GET("/view_transaction")

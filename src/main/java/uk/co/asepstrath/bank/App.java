@@ -1,7 +1,7 @@
 package uk.co.asepstrath.bank;
 
 import org.xml.sax.SAXException;
-//import uk.co.asepstrath.bank.example.ExampleController;
+import uk.co.asepstrath.bank.example.ExampleController;
 import io.jooby.Jooby;
 import io.jooby.handlebars.HandlebarsModule;
 import io.jooby.helper.UniRestExtension;
@@ -41,7 +41,7 @@ public class App extends Jooby {
 
         DatabaseUtil.createInstance(ds);
 
-//        mvc(new ExampleController(ds,log));
+        mvc(new ExampleController(ds,log));
         mvc(new AppController(log));
 
         /*
@@ -119,7 +119,7 @@ public class App extends Jooby {
             user.setName("user");
             user.setAccounts(accounts);
             try {
-                user.setPassword(encryption.encrypt("Password!").toString());
+                user.setPassword(new String(encryption.encrypt("Password!")));
             } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
                 throw new RuntimeException(e);
             }

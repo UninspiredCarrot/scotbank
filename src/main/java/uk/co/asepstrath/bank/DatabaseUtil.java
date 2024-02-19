@@ -410,6 +410,27 @@ public class DatabaseUtil extends Jooby {
 
         return user;
     }
+    public User getUserByUsername(String username) throws SQLException{
+        Connection con = ds.getConnection();
+        Statement stmt = con.createStatement();
+        ResultSet rs = stmt.executeQuery(
+            "SELECT * FROM users WHERE username = \'"+username+"\'"
+        );
+        User user = null;
+        if(rs.next()){
+            user = new User();
+            user.setId(rs.getInt("id"));
+            user.setPassword(rs.getString("password"));
+            user.setName(rs.getString("username"));
+            user.setAccounts(getAccountsByUser(user.getId()));
+        }
+
+        rs.close();
+        stmt.close();
+        con.close();
+
+        return user;
+    }
 
     // Read Users.
     public ArrayList<User> getAllUsers() throws SQLException{
