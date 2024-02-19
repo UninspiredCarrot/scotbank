@@ -1,10 +1,27 @@
 package uk.co.asepstrath.bank;
 
+import io.jooby.Jooby;
+import kong.unirest.core.GenericType;
+import kong.unirest.core.HttpResponse;
+import kong.unirest.core.Unirest;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
 import javax.sql.DataSource;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.net.URL;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
-public class DatabaseUtil {
+public class DatabaseUtil extends Jooby {
 
     private static DataSource ds;
     private static DatabaseUtil db_util;
@@ -13,13 +30,185 @@ public class DatabaseUtil {
 
     }
 
+    public static void createDatabase() throws SQLException{
+        Connection connection = ds.getConnection();
+        //-----------------create the users table-----------------------------------------------
+        Statement stmt = connection.createStatement();
+        stmt.executeUpdate(
+                "CREATE TABLE IF NOT EXISTS `users` (" +
+                        "id IDENTITY PRIMARY KEY," +
+                        "username VARCHAR(255) NOT NULL," +
+                        "password VARCHAR(255) NOT NULL" +
+                        ")"
+        );
+        stmt.close();
+        //--------------------------------------------------------------------------------------
+
+        //------------create accounts table------------------------------------------------------
+
+        stmt = connection.createStatement();
+        stmt.executeUpdate(
+                "CREATE TABLE IF NOT EXISTS `accounts` (" +
+                        "id VARCHAR(255) PRIMARY KEY," +
+                        "`name` VARCHAR(255) NOT NULL," +
+                        "balance DECIMAL NOT NULL," +
+                        "round_up_enabled BIT NOT NULL)"
+        );
+
+        //---------------------------------------------------------------------------------------
+
+        //-------------------connect accounts and users tables-----------------------------------
+        stmt = connection.createStatement();
+        stmt.executeUpdate(
+                "CREATE TABLE IF NOT EXISTS `user_accounts` (" +
+                        "user_id DECIMAL," +
+                        "account_id VARCHAR(255)," +
+                        "PRIMARY KEY (user_id, account_id)," +
+                        "FOREIGN KEY (user_id) REFERENCES users(id)," +
+                        "FOREIGN KEY (account_id) REFERENCES accounts(id)" +
+                        ")"
+        );
+        stmt.close();
+        //---------------------------------------------------------------------------------------
+
+        //--------------create transactions table-----------------------------------------------
+        stmt = connection.createStatement();
+        stmt.executeUpdate(
+                "CREATE TABLE IF NOT EXISTS`transactions` (" +
+                        "id VARCHAR(255) PRIMARY KEY,"+
+                        "`timestamp` VARCHAR(255) NOT NULL,"+
+                        "`to` VARCHAR(255) NOT NULL," +
+                        "`from` VARCHAR(255)," +
+                        "amount DECIMAL NOT NULL,"+
+                        "transaction_type VARCHAR(255) NOT NULL," +
+                        "PRIMARY KEY (id)"+
+                        ")"
+        );
+        stmt.close();
+        //---------------------------------------------------------------------------------------
+
+    }
+
     public static void createInstance(DataSource dataSource){
         if(db_util == null) db_util = new DatabaseUtil();
         ds=dataSource;
     }
+    public static void fetchDataFromAPI() throws SQLException, ParserConfigurationException, IOException, SAXException {
+        //----------------read accounts from the account api-------------------------------------
+        HttpResponse<List<Account>> accountResponse =
+                Unirest
+                        .get("https://api.asep-strath.co.uk/api/accounts")
+                        .asObject(new GenericType<>(){});
+
+        db_util.createAccountEntitiesFromList((ArrayList<Account>)accountResponse.getBody());
+        //---------------------------------------------------------------------------------------
+
+        //-----------------Get transaction information from api and save to data base------------
+
+        URL url = new URL("https://api.asep-strath.co.uk/api/transactions?size=1000");
+        DocumentBuilderFactory doc_builder_fact = DocumentBuilderFactory.newInstance();
+        DocumentBuilder doc_builder = doc_builder_fact.newDocumentBuilder();
+        Document doc = doc_builder.parse(new InputSource(url.openStream()));
+        doc.getDocumentElement().normalize();
+
+        NodeList nodeList = doc.getElementsByTagName("results");
+
+        ArrayList<Transaction> transactions = new ArrayList<>();
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Transaction transaction = new Transaction();
+            Node node = nodeList.item(i).getFirstChild();
+            while (node != null) {
+                switch (node.getNodeName()) {
+                    case "timestamp":
+                        if(node.getFirstChild() != null)
+                            transaction.setTimestamp(node.getFirstChild().getNodeValue());
+                        break;
+                    case "amount":
+                        if(node.getFirstChild() != null)
+                            transaction.setAmount(Double.parseDouble(node.getFirstChild().getNodeValue()));
+                        break;
+                    case "from":
+                        if(node.getFirstChild() != null)
+                            transaction.setFrom(node.getFirstChild().getNodeValue());
+                        break;
+                    case "id":
+                        if(node.getFirstChild() != null)
+                            transaction.setId(node.getFirstChild().getNodeValue());
+                        break;
+                    case "to":
+                        if(node.getFirstChild() != null)
+                            transaction.setTo(node.getFirstChild().getNodeValue());
+                        break;
+                    case "type":
+                        if(node.getFirstChild() != null)
+                            transaction.setTransaction_type(node.getFirstChild().getNodeValue());
+                        break;
+                }
+                node = node.getNextSibling();
+            }
+            transactions.add(transaction);
+        }
+        db_util.createTransactionEntitiesFromList(transactions);
+
+        /*int p = 1;
+        while(true){
+            String urlString = "https://api.asep-strath.co.uk/api/transactions?size=100&page="+p;
+            URL url = new URL(urlString);
+            DocumentBuilderFactory doc_builder_fact = DocumentBuilderFactory.newInstance();
+            DocumentBuilder doc_builder = doc_builder_fact.newDocumentBuilder();
+            Document doc = doc_builder.parse(new InputSource(url.openStream()));
+            doc.getDocumentElement().normalize();
+
+            NodeList nodeList = doc.getElementsByTagName("results");
+
+            if(nodeList.getLength()<1) {
+                break;
+            }
+
+            ArrayList<Transaction> transactions = new ArrayList<>();
+            for (int i = 0; i < nodeList.getLength(); i++) {
+                Transaction transaction = new Transaction();
+                Node node = nodeList.item(i).getFirstChild();
+                while (node != null) {
+                    switch (node.getNodeName()) {
+                        case "timestamp":
+                            if(node.getFirstChild() != null)
+                                transaction.setTimestamp(node.getFirstChild().getNodeValue());
+                            break;
+                        case "amount":
+                            if(node.getFirstChild() != null)
+                                transaction.setAmount(Double.parseDouble(node.getFirstChild().getNodeValue()));
+                            break;
+                        case "from":
+                            if(node.getFirstChild() != null)
+                                transaction.setFrom(node.getFirstChild().getNodeValue());
+                            break;
+                        case "id":
+                            if(node.getFirstChild() != null)
+                                transaction.setId(node.getFirstChild().getNodeValue());
+                            break;
+                        case "to":
+                            if(node.getFirstChild() != null)
+                                transaction.setTo(node.getFirstChild().getNodeValue());
+                            break;
+                        case "type":
+                            if(node.getFirstChild() != null)
+                                transaction.setTransaction_type(node.getFirstChild().getNodeValue());
+                            break;
+                    }
+                    node = node.getNextSibling();
+                }
+                transactions.add(transaction);
+            }
+            db_util.createTransactionEntitiesFromList(transactions);
+            p++;
+        }*/
+    }
     public static DatabaseUtil getInstance(){
         return db_util;
     }
+
+
 
 
     // Create User Entity.
@@ -28,40 +217,86 @@ public class DatabaseUtil {
         Connection con = ds.getConnection();
         PreparedStatement prep = con.prepareStatement(
             "INSERT INTO users (" +
-                "id, username, password" +
-            ")VALUES(?,?,?)"
+                "username, password" +
+            ")VALUES(?,?)"
         );
 
-        prep.setInt(1, user.getId());
-        prep.setString(2, user.getName());
-        prep.setString(3, user.getPassword());
+//        prep.setInt(1, user.getId());
+        prep.setString(1, user.getName());
+        prep.setString(2, user.getPassword());
         prep.executeUpdate();
         prep.close();
-        con.close();
+
+        Statement stmt = con.createStatement();
+        ResultSet rs = stmt.executeQuery(
+                "SELECT * FROM users WHERE username = \'"+user.getName()+"\'"
+        );
+
+        rs.next();
+        user.setId(rs.getInt("id"));
+
+        for(Account account : user.getAccounts()){
+            createAccountEntity(account, user.getId());
+        }
+    }
+
+    public String createTransactionId() throws SQLException{
+        String id = String.valueOf(UUID.randomUUID());
+        boolean id_found = false;
+        while(!id_found)
+        {
+            Connection con = ds.getConnection();
+            Statement stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery(
+                    "SELECT id FROM accounts WHERE id = \'"+id+"\'"
+            );
+            if(rs.next()){
+                id = String.valueOf(UUID.randomUUID());
+            }else{
+                id_found = true;
+            }
+        }
+        return id;
     }
 
     // Create Account Entity.
-    public void createAccountEntity(Account account, String user_id) throws SQLException {
+    public boolean createAccountEntity(Account account, int user_id) throws SQLException {
         Connection con = ds.getConnection();
-        PreparedStatement prep = con.prepareStatement(
-        "INSERT INTO accounts (" +
-                "id, name, balance, round_up_enabled" +
-            ")VALUES (?,?,?,?);"
+
+        Statement stmt = con.createStatement();
+        ResultSet rs = stmt.executeQuery(
+                "SELECT id FROM accounts " +
+                    "WHERE id = \'"+account.getId()+"\'"
         );
+        if(rs.next()) {
+            rs.close();
+            stmt.close();
+        }else{
+            rs.close();
+            stmt.close();
 
-        prep.setString(1, account.getId());
-        prep.setString(2, account.getName());
-        prep.setDouble(3, account.getBalance());
-        prep.setBoolean(4, account.isRoundUpEnabled());
-        prep.executeUpdate();
+            PreparedStatement prep = con.prepareStatement(
+            "INSERT INTO accounts (" +
+                    "id, name, balance, round_up_enabled" +
+                ")VALUES (?,?,?,?);"
+            );
 
-        prep.close();
+            prep.setString(1, account.getId());
+            prep.setString(2, account.getName());
+            prep.setDouble(3, account.getBalance());
+            prep.setBoolean(4, account.isRoundUpEnabled());
+            prep.executeUpdate();
 
-        if(user_id != null){
+            prep.close();
+
+        }
+
+        if(user_id > 0){
             createUserAccountEntity(user_id, account.getId());
         }
 
         con.close();
+        return true;
     }
 
     // Create Multiple Account Entities
@@ -87,7 +322,7 @@ public class DatabaseUtil {
     }
 
     // Create User Account Entity
-    public void createUserAccountEntity(String user_id, String account_id) throws SQLException{
+    public void createUserAccountEntity(int user_id, String account_id) throws SQLException{
         Connection con = ds.getConnection();
         PreparedStatement prep = con.prepareStatement(
         "INSERT INTO user_accounts (" +
@@ -95,7 +330,7 @@ public class DatabaseUtil {
             ")VALUES (?,?)"
         );
 
-        prep.setString(1, user_id);
+        prep.setInt(1, user_id);
         prep.setString(2, account_id);
 
         prep.executeUpdate();
@@ -108,16 +343,17 @@ public class DatabaseUtil {
     public void createTransactionEntity(Transaction transaction) throws SQLException{
         Connection con = ds.getConnection();
         PreparedStatement prep = con.prepareStatement(
-        "INSERT INTO transactions (" +
-                "   id, `to`, timestamp, amount, transaction_type" +
-            ") VALUES (?,?,?,?,?)"
+                "INSERT INTO `transactions` (" +
+                        "id, `timestamp`, `to`, `from`, amount, transaction_type" +
+                        ") VALUES (?,?,?,?,?,?)"
         );
 
         prep.setString(1, transaction.getId());
-        prep.setString(2, transaction.getTo());
-        prep.setString(3, transaction.getTimestamp());
-        prep.setDouble(4, transaction.getAmount());
-        prep.setString(5, transaction.getTransaction_type());
+        prep.setString(2, transaction.getTimestamp());
+        prep.setString(3, transaction.getTo());
+        prep.setString(4, transaction.getFrom());
+        prep.setDouble(5, transaction.getAmount());
+        prep.setString(6, transaction.getTransaction_type());
 
         prep.executeUpdate();
 
@@ -150,13 +386,14 @@ public class DatabaseUtil {
 
 
 
-    // Read User.
 
-    public User getUserByID(String user_id) throws SQLException{
+
+    // Read User.
+    public User getUserByID(int user_id) throws SQLException{
         Connection con = ds.getConnection();
         Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery(
-            "SELECT * FROM users WHERE id = '"+user_id+"'"
+            "SELECT * FROM users WHERE id = "+user_id
         );
 
         rs.next();
@@ -173,10 +410,29 @@ public class DatabaseUtil {
 
         return user;
     }
+    public User getUserByUsername(String username) throws SQLException{
+        Connection con = ds.getConnection();
+        Statement stmt = con.createStatement();
+        ResultSet rs = stmt.executeQuery(
+            "SELECT * FROM users WHERE username = \'"+username+"\'"
+        );
+        User user = null;
+        if(rs.next()){
+            user = new User();
+            user.setId(rs.getInt("id"));
+            user.setPassword(rs.getString("password"));
+            user.setName(rs.getString("username"));
+            user.setAccounts(getAccountsByUser(user.getId()));
+        }
 
+        rs.close();
+        stmt.close();
+        con.close();
+
+        return user;
+    }
 
     // Read Users.
-
     public ArrayList<User> getAllUsers() throws SQLException{
         Connection con = ds.getConnection();
         Statement stmt = con.createStatement();
@@ -206,7 +462,7 @@ public class DatabaseUtil {
         Connection con = ds.getConnection();
         Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery(
-                "SELECT * FROM users WHERE username = ''"+username+"''"
+                "SELECT * FROM users WHERE username = \'"+username+"\'"
         );
         if(rs.next()) {
             rs.close();
@@ -280,7 +536,7 @@ public class DatabaseUtil {
         Connection con = ds.getConnection();
         Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery(
-                "SELECT * FROM user_accounts WHERE user_id "+user_id+""
+                "SELECT * FROM user_accounts WHERE user_id = "+user_id
         );
         while(rs.next()){
             account_ids.add(rs.getString("account_id"));
@@ -292,24 +548,25 @@ public class DatabaseUtil {
         for(String id : account_ids){
             stmt = con.createStatement();
             rs = stmt.executeQuery(
-                    "SELECT * FROM accounts WHERE id =\' "+id+"\'"
+                    "SELECT * FROM accounts WHERE id =\'"+id+"\'"
             );
 
-            rs.next();
-
-            Account account = new Account();
-            account.setId(rs.getString("id"));
-            account.setName(rs.getString("name"));
-            account.setStartingBalance(rs.getDouble("balance"));
-            account.setRoundUpEnabled(rs.getBoolean("round_up_enabled"));
-            account.setTransactions(getTransactionsByAccount(account.getId()));
-            accounts.add(account);
+            while(rs.next())
+            {
+                Account account = new Account();
+                account.setId(rs.getString("id"));
+                account.setName(rs.getString("name"));
+                account.setStartingBalance(rs.getDouble("balance"));
+                account.setRoundUpEnabled(rs.getBoolean("round_up_enabled"));
+                account.setTransactions(getTransactionsByAccount(account.getId()));
+                accounts.add(account);
+            }
 
 
             stmt.close();
             rs.close();
-            con.close();
         }
+        con.close();
         return accounts;
     }
 
@@ -412,19 +669,21 @@ public class DatabaseUtil {
     }
 
 
-// Update User.
-/*
-    public User updateUser(String user_id, User user) throws SQLException{
+
+
+    // Update User.
+
+    public User updateUser(int user_id, User user) throws SQLException{
         Connection con = ds.getConnection();
         PreparedStatement prep = con.prepareStatement(
             "UPDATE users " +
             "SET " +
-                "username = \'?\' password = \'?\'" +
-            "WHERE id = \'?\'"
+                "username = ?, password = ?" +
+            "WHERE id = ?"
         );
         prep.setString(1, user.getName());
         prep.setString(2, user.getPassword());
-        prep.setString(3, user_id);
+        prep.setInt(3, user_id);
         prep.executeUpdate();
 
         prep.close();
@@ -432,7 +691,6 @@ public class DatabaseUtil {
 
         return user;
     }
-*/
 
     // Update Account.
     public Account updateAccount(String account_id, Account account) throws SQLException{

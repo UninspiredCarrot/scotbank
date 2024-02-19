@@ -15,6 +15,14 @@ public class Account {
         startingBalance = 0;
     }
 
+    public Account (String id, String name, double startingBalance, boolean roundUpEnabled){
+        this.id = id;
+        this.name = name;
+        this.startingBalance = startingBalance;
+        this.roundUpEnabled = roundUpEnabled;
+        this.transactions = new ArrayList<>();
+    }
+
     public String getId() {
         return id;
     }

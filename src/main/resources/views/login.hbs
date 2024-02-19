@@ -1,27 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <title>Scotbank - Log In</title>
-    </head>
-
-    <body>
+  <head>
+    <meta charset="utf-8">
+    <title>Scotbank - Log In</title>
+  </head>
+  <body>
     <h1>Scot Bank</h1>
-    <form id="formlogin" autocomplete="off" style="width:auto">
-        <fieldset>
-            <legend>Log In / Sign Up</legend>
-            <br>
-            Username: <input name="username"><br>
-            <br>
-            Password: <input name="password" type="password"><br>
-            <br><br>
-            <button name="login" type="submit" value="login">Log In</button>
-            <button name="signin" type="submit" value="signin">Sign Up</button>
-            <br><br>
-        </fieldset>
-    </form>
-    </body>
-    </body>
-
-
+    <form id="formlogin" action="/bank/login" autocomplete="off" method="post" style="width:auto">
+      <fieldset>
+        <legend>Log In / Sign Up</legend>
+        <br>
+        <label for="username">Username: </label>
+        <input  id="username" name="username"><br>
+        <br>
+        <label for="password">Password: </label>
+        <input id="password" name="password" type="password"><br>
+        <br><br>
+        <button name="login" type="submit" value="login">Log In</button>
+        <button name="signin" type="submit" value="signin">Sign Up</button>
+        <br><br>
+      </fieldset>
+  </body>
 </html>
