@@ -105,54 +105,55 @@ public class DatabaseUtil extends Jooby {
 
         //-----------------Get transaction information from api and save to data base------------
 
-        URL url = new URL("https://api.asep-strath.co.uk/api/transactions?size=1000");
-        DocumentBuilderFactory doc_builder_fact = DocumentBuilderFactory.newInstance();
-        DocumentBuilder doc_builder = doc_builder_fact.newDocumentBuilder();
-        Document doc = doc_builder.parse(new InputSource(url.openStream()));
-        doc.getDocumentElement().normalize();
+//        URL url = new URL("https://api.asep-strath.co.uk/api/transactions?size=1000");
+//        DocumentBuilderFactory doc_builder_fact = DocumentBuilderFactory.newInstance();
+//        DocumentBuilder doc_builder = doc_builder_fact.newDocumentBuilder();
+//        Document doc = doc_builder.parse(new InputSource(url.openStream()));
+//        doc.getDocumentElement().normalize();
+//
+//        NodeList nodeList = doc.getElementsByTagName("results");
+//
+//        ArrayList<Transaction> transactions = new ArrayList<>();
+//        for (int i = 0; i < nodeList.getLength(); i++) {
+//            Transaction transaction = new Transaction();
+//            Node node = nodeList.item(i).getFirstChild();
+//            while (node != null) {
+//                switch (node.getNodeName()) {
+//                    case "timestamp":
+//                        if(node.getFirstChild() != null)
+//                            transaction.setTimestamp(node.getFirstChild().getNodeValue());
+//                        break;
+//                    case "amount":
+//                        if(node.getFirstChild() != null)
+//                            transaction.setAmount(Double.parseDouble(node.getFirstChild().getNodeValue()));
+//                        break;
+//                    case "from":
+//                        if(node.getFirstChild() != null)
+//                            transaction.setFrom(node.getFirstChild().getNodeValue());
+//                        break;
+//                    case "id":
+//                        if(node.getFirstChild() != null)
+//                            transaction.setId(node.getFirstChild().getNodeValue());
+//                        break;
+//                    case "to":
+//                        if(node.getFirstChild() != null)
+//                            transaction.setTo(node.getFirstChild().getNodeValue());
+//                        break;
+//                    case "type":
+//                        if(node.getFirstChild() != null)
+//                            transaction.setTransaction_type(node.getFirstChild().getNodeValue());
+//                        break;
+//                }
+//                node = node.getNextSibling();
+//            }
+//            transactions.add(transaction);
+//        }
+//        db_util.createTransactionEntitiesFromList(transactions);
 
-        NodeList nodeList = doc.getElementsByTagName("results");
-
-        ArrayList<Transaction> transactions = new ArrayList<>();
-        for (int i = 0; i < nodeList.getLength(); i++) {
-            Transaction transaction = new Transaction();
-            Node node = nodeList.item(i).getFirstChild();
-            while (node != null) {
-                switch (node.getNodeName()) {
-                    case "timestamp":
-                        if(node.getFirstChild() != null)
-                            transaction.setTimestamp(node.getFirstChild().getNodeValue());
-                        break;
-                    case "amount":
-                        if(node.getFirstChild() != null)
-                            transaction.setAmount(Double.parseDouble(node.getFirstChild().getNodeValue()));
-                        break;
-                    case "from":
-                        if(node.getFirstChild() != null)
-                            transaction.setFrom(node.getFirstChild().getNodeValue());
-                        break;
-                    case "id":
-                        if(node.getFirstChild() != null)
-                            transaction.setId(node.getFirstChild().getNodeValue());
-                        break;
-                    case "to":
-                        if(node.getFirstChild() != null)
-                            transaction.setTo(node.getFirstChild().getNodeValue());
-                        break;
-                    case "type":
-                        if(node.getFirstChild() != null)
-                            transaction.setTransaction_type(node.getFirstChild().getNodeValue());
-                        break;
-                }
-                node = node.getNextSibling();
-            }
-            transactions.add(transaction);
-        }
-        db_util.createTransactionEntitiesFromList(transactions);
-
-        /*int p = 1;
+        int p = 1;
         while(true){
-            String urlString = "https://api.asep-strath.co.uk/api/transactions?size=100&page="+p;
+            System.out.println(p);
+            String urlString = "https://api.asep-strath.co.uk/api/transactions?size=1000&page="+p;
             URL url = new URL(urlString);
             DocumentBuilderFactory doc_builder_fact = DocumentBuilderFactory.newInstance();
             DocumentBuilder doc_builder = doc_builder_fact.newDocumentBuilder();
@@ -199,10 +200,11 @@ public class DatabaseUtil extends Jooby {
                     node = node.getNextSibling();
                 }
                 transactions.add(transaction);
+//                db_util.createTransactionEntity(transaction);
             }
             db_util.createTransactionEntitiesFromList(transactions);
             p++;
-        }*/
+        }
     }
     public static DatabaseUtil getInstance(){
         return db_util;
