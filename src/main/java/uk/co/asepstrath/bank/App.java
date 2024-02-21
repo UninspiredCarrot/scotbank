@@ -138,9 +138,9 @@ public class App extends Jooby {
             ArrayList<Account> accounts_check = db_util.getAllAccounts();
             ArrayList<Transaction> transactions_check = db_util.getAllTransactions();
             ArrayList<User> users_check = db_util.getAllUsers();
-            assertEquals(100, accounts_check.size());
+            assertEquals(101, accounts_check.size());
             assertEquals(3047, transactions_check.size());
-            assertEquals(100, users_check.size());
+            assertEquals(3, users_check.size());
 
         } catch (SQLException e) {
             log.error("Database Creation Error",e);

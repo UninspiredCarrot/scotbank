@@ -110,149 +110,104 @@ public class DatabaseUtil extends Jooby {
         if(db_util == null) db_util = new DatabaseUtil();
         ds=dataSource;
     }
+
     public static void fetchDataFromAPI() throws SQLException, ParserConfigurationException, IOException, SAXException, CsvValidationException {
         //----------------read accounts from the account api-------------------------------------
-        HttpResponse<List<Account>> accountResponse =
-                Unirest
-                        .get("https://api.asep-strath.co.uk/api/accounts")
-                        .asObject(new GenericType<>(){});
+        {
+            HttpResponse<List<Account>> accountResponse =
+                    Unirest
+                            .get("https://api.asep-strath.co.uk/api/accounts")
+                            .asObject(new GenericType<>() {
+                            });
 
-        db_util.createAccountEntitiesFromList((ArrayList<Account>)accountResponse.getBody());
+            db_util.createAccountEntitiesFromList((ArrayList<Account>) accountResponse.getBody());
+        }
         //---------------------------------------------------------------------------------------
 
         //-----------------Get transaction information from api and save to data base------------
+        {
+            int p = 1;
+            NodeList nodeList;
+            do{
+                String urlString = "https://api.asep-strath.co.uk/api/transactions?size=1000&page=" + p;
+                URL url = new URL(urlString);
+                DocumentBuilderFactory doc_builder_fact = DocumentBuilderFactory.newInstance();
+                DocumentBuilder doc_builder = doc_builder_fact.newDocumentBuilder();
+                Document doc = doc_builder.parse(new InputSource(url.openStream()));
+                doc.getDocumentElement().normalize();
 
-//        URL url = new URL("https://api.asep-strath.co.uk/api/transactions?size=1000");
-//        DocumentBuilderFactory doc_builder_fact = DocumentBuilderFactory.newInstance();
-//        DocumentBuilder doc_builder = doc_builder_fact.newDocumentBuilder();
-//        Document doc = doc_builder.parse(new InputSource(url.openStream()));
-//        doc.getDocumentElement().normalize();
-//
-//        NodeList nodeList = doc.getElementsByTagName("results");
-//
-//        ArrayList<Transaction> transactions = new ArrayList<>();
-//        for (int i = 0; i < nodeList.getLength(); i++) {
-//            Transaction transaction = new Transaction();
-//            Node node = nodeList.item(i).getFirstChild();
-//            while (node != null) {
-//                switch (node.getNodeName()) {
-//                    case "timestamp":
-//                        if(node.getFirstChild() != null)
-//                            transaction.setTimestamp(node.getFirstChild().getNodeValue());
-//                        break;
-//                    case "amount":
-//                        if(node.getFirstChild() != null)
-//                            transaction.setAmount(Double.parseDouble(node.getFirstChild().getNodeValue()));
-//                        break;
-//                    case "from":
-//                        if(node.getFirstChild() != null)
-//                            transaction.setFrom(node.getFirstChild().getNodeValue());
-//                        break;
-//                    case "id":
-//                        if(node.getFirstChild() != null)
-//                            transaction.setId(node.getFirstChild().getNodeValue());
-//                        break;
-//                    case "to":
-//                        if(node.getFirstChild() != null)
-//                            transaction.setTo(node.getFirstChild().getNodeValue());
-//                        break;
-//                    case "type":
-//                        if(node.getFirstChild() != null)
-//                            transaction.setTransaction_type(node.getFirstChild().getNodeValue());
-//                        break;
-//                }
-//                node = node.getNextSibling();
-//            }
-//            transactions.add(transaction);
-//        }
-//        db_util.createTransactionEntitiesFromList(transactions);
+                nodeList = doc.getElementsByTagName("results");
 
-        int p = 1;
-        while(true){
-            System.out.println(p);
-            String urlString = "https://api.asep-strath.co.uk/api/transactions?size=1000&page="+p;
-            URL url = new URL(urlString);
-            DocumentBuilderFactory doc_builder_fact = DocumentBuilderFactory.newInstance();
-            DocumentBuilder doc_builder = doc_builder_fact.newDocumentBuilder();
-            Document doc = doc_builder.parse(new InputSource(url.openStream()));
-            doc.getDocumentElement().normalize();
-
-            NodeList nodeList = doc.getElementsByTagName("results");
-
-            if(nodeList.getLength()<1) {
-                break;
-            }
-
-            ArrayList<Transaction> transactions = new ArrayList<>();
-            for (int i = 0; i < nodeList.getLength(); i++) {
-                Transaction transaction = new Transaction();
-                Node node = nodeList.item(i).getFirstChild();
-                while (node != null) {
-                    switch (node.getNodeName()) {
-                        case "timestamp":
-                            if(node.getFirstChild() != null)
-                                transaction.setTimestamp(node.getFirstChild().getNodeValue());
-                            break;
-                        case "amount":
-                            if(node.getFirstChild() != null)
-                                transaction.setAmount(Double.parseDouble(node.getFirstChild().getNodeValue()));
-                            break;
-                        case "from":
-                            if(node.getFirstChild() != null)
-                                transaction.setFrom(node.getFirstChild().getNodeValue());
-                            break;
-                        case "id":
-                            if(node.getFirstChild() != null)
-                                transaction.setId(node.getFirstChild().getNodeValue());
-                            break;
-                        case "to":
-                            if(node.getFirstChild() != null)
-                                transaction.setTo(node.getFirstChild().getNodeValue());
-                            break;
-                        case "type":
-                            if(node.getFirstChild() != null)
-                                transaction.setTransaction_type(node.getFirstChild().getNodeValue());
-                            break;
+                ArrayList<Transaction> transactions = new ArrayList<>();
+                for (int i = 0; i < nodeList.getLength(); i++) {
+                    Transaction transaction = new Transaction();
+                    Node node = nodeList.item(i).getFirstChild();
+                    while (node != null) {
+                        switch (node.getNodeName()) {
+                            case "timestamp":
+                                if (node.getFirstChild() != null)
+                                    transaction.setTimestamp(node.getFirstChild().getNodeValue());
+                                break;
+                            case "amount":
+                                if (node.getFirstChild() != null)
+                                    transaction.setAmount(Double.parseDouble(node.getFirstChild().getNodeValue()));
+                                break;
+                            case "from":
+                                if (node.getFirstChild() != null)
+                                    transaction.setFrom(node.getFirstChild().getNodeValue());
+                                break;
+                            case "id":
+                                if (node.getFirstChild() != null)
+                                    transaction.setId(node.getFirstChild().getNodeValue());
+                                break;
+                            case "to":
+                                if (node.getFirstChild() != null)
+                                    transaction.setTo(node.getFirstChild().getNodeValue());
+                                break;
+                            case "type":
+                                if (node.getFirstChild() != null)
+                                    transaction.setTransaction_type(node.getFirstChild().getNodeValue());
+                                break;
+                        }
+                        node = node.getNextSibling();
                     }
-                    node = node.getNextSibling();
+                    transactions.add(transaction);
                 }
-                transactions.add(transaction);
-//                db_util.createTransactionEntity(transaction);
-            }
-            db_util.createTransactionEntitiesFromList(transactions);
-            p++;
-<<<<<<< bbe84dd8295d6adf3c124be85a311ca9c93516f1
-        }*/
-
-
-        db_util.createBusinessEntitiesFromList(getBusinessesFromAPI());
-=======
+                db_util.createTransactionEntitiesFromList(transactions);
+                p++;
+            }while (nodeList.getLength() > 0);
         }
->>>>>>> d673a0ed411e1e631bddeee748aac6bc507e3370
+        //---------------------------------------------------------------------------------------
+
+        //-----------------GET businesses information from api-----------------------------------
+        {
+            HttpResponse<String> response = Unirest.get("https://api.asep-strath.co.uk/api/businesses").asString();
+            String csvContent = response.getBody();
+
+            CSVReader csvReader = new CSVReader(new StringReader(csvContent));
+            String[] nextRecord;
+
+            csvReader.readNext();
+            ArrayList<Business> businesses = new ArrayList<>();
+            while ((nextRecord = csvReader.readNext()) != null) {
+                String id = nextRecord[0];
+                String name = nextRecord[1];
+                String category = nextRecord[2];
+                String sanctioned = nextRecord[3];
+
+                businesses.add(new Business(id, name, category, sanctioned));
+            }
+
+            db_util.createBusinessEntitiesFromList(businesses);
+        }
+        //---------------------------------------------------------------------------------------
+
     }
+
     public static DatabaseUtil getInstance(){
         return db_util;
     }
 
-    public static ArrayList<Business> getBusinessesFromAPI() throws CsvValidationException, IOException {
-        HttpResponse<String> response = Unirest.get("https://api.asep-strath.co.uk/api/businesses").asString();
-        String csvContent = response.getBody();
-
-        CSVReader csvReader = new CSVReader(new StringReader(csvContent));
-        String[] nextRecord;
-
-        csvReader.readNext();
-        ArrayList<Business> businesses = new ArrayList<>();
-        while ((nextRecord = csvReader.readNext()) != null) {
-            String id = nextRecord[0];
-            String name = nextRecord[1];
-            String category = nextRecord[2];
-            String sanctioned = nextRecord[3];
-
-            businesses.add(new Business(id, name, category, sanctioned));
-        }
-        return businesses;
-    }
 
     // Create User Entity.
 
