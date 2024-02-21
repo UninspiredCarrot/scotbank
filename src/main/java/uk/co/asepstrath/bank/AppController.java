@@ -18,10 +18,7 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 @Path("/bank")
 public class AppController {
@@ -125,5 +122,92 @@ public class AppController {
 
         return new ModelAndView("view_transaction.hbs", model);
 
+    }
+
+    @GET("/summary")
+    public ModelAndView summary(@QueryParam String id) throws SQLException {
+        Map<String, Object> model = new HashMap<>();
+        ArrayList<Transaction> transactions;
+
+        try
+        {
+            transactions = db.getTransactionsByAccount(id);
+
+        } catch (SQLException e) {
+            logger.error("Transactions Database Error Occurred",e);
+            throw new StatusCodeException(StatusCode.SERVER_ERROR, "Transactions Database Error Occurred");
+        }
+
+        double EntertainmentTotal = 0;
+        double ClothingTotal = 0;
+        double GiftsTotal = 0;
+        double CoffeeTotal = 0;
+        double OnlineRetailerTotal = 0;
+        double OtherTotal = 0;
+        double FurnitureTotal = 0;
+        double HealthBeautyTotal = 0;
+        double OpticiansTotal = 0;
+        double GroceriesTotal = 0;
+        double EatingOutTotal = 0;
+        double JewleryTotal = 0;
+        double UtilitiesTotal = 0;
+        double DepartmentStoreTotal = 0;
+        double BooksTotal = 0;
+
+
+        for (Transaction transaction:transactions){
+            if (Objects.equals(transaction.getTransaction_type(), "PAYMENT")) {
+                String category = db.getBusinessFromID(transaction.getTo()).getCategory();
+                if (Objects.equals(category, "Entertainment")) {
+                    EntertainmentTotal += transaction.getAmount();
+                } else if (Objects.equals(category, "Clothing")) {
+                    ClothingTotal += transaction.getAmount();
+                } else if (Objects.equals(category, "Gifts")) {
+                    GiftsTotal += transaction.getAmount();
+                } else if (Objects.equals(category, "Coffee")) {
+                    CoffeeTotal += transaction.getAmount();
+                } else if (Objects.equals(category, "Online Retailer")) {
+                    OnlineRetailerTotal += transaction.getAmount();
+                } else if (Objects.equals(category, "Other")) {
+                    OtherTotal += transaction.getAmount();
+                } else if (Objects.equals(category, "Furniture")) {
+                    FurnitureTotal += transaction.getAmount();
+                } else if (Objects.equals(category, "Health & Beauty")) {
+                    HealthBeautyTotal += transaction.getAmount();
+                } else if (Objects.equals(category, "Opticians")) {
+                    OpticiansTotal += transaction.getAmount();
+                } else if (Objects.equals(category, "Groceries")) {
+                    GroceriesTotal += transaction.getAmount();
+                } else if (Objects.equals(category, "Eating Out")) {
+                    EatingOutTotal += transaction.getAmount();
+                } else if (Objects.equals(category, "Jewlery")) {
+                    JewleryTotal += transaction.getAmount();
+                } else if (Objects.equals(category, "Utilities")) {
+                    UtilitiesTotal += transaction.getAmount();
+                } else if (Objects.equals(category, "Department Store")) {
+                    DepartmentStoreTotal += transaction.getAmount();
+                } else if (Objects.equals(category, "Books")) {
+                    BooksTotal += transaction.getAmount();
+                }
+
+            }
+        }
+
+        model.put("EntertainmentTotal", EntertainmentTotal);
+        model.put("ClothingTotal", ClothingTotal);
+        model.put("GiftsTotal", GiftsTotal);
+        model.put("CoffeeTotal", CoffeeTotal);
+        model.put("OnlineRetailerTotal", OnlineRetailerTotal);
+        model.put("OtherTotal", OtherTotal);
+        model.put("FurnitureTotal", FurnitureTotal);
+        model.put("HealthBeautyTotal", HealthBeautyTotal);
+        model.put("OpticiansTotal", OpticiansTotal);
+        model.put("GroceriesTotal", GroceriesTotal);
+        model.put("EatingOutTotal", EatingOutTotal);
+        model.put("JewleryTotal", JewleryTotal);
+        model.put("UtilitiesTotal", UtilitiesTotal);
+        model.put("DepartmentStoreTotal", DepartmentStoreTotal);
+        model.put("BooksTotal", BooksTotal);
+        return new ModelAndView("summary.hbs", model);
     }
 }
