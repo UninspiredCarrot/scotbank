@@ -98,4 +98,17 @@ public class UserTest {
         assertEquals(3, user.getAccounts().size());
     }
 
+    @Test
+    public void testToString(){
+        User user = new User(
+                1,
+                "John",
+                "password",
+                new ArrayList<>()
+        );
+        assertEquals(
+"{id: 1}\n{name: John}\n{password: password}\n----ACCOUNTS----\n",
+        user.toString()
+        );
+    }
 }

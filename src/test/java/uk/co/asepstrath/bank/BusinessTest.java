@@ -57,4 +57,9 @@ class BusinessTest {
         business.setSanctioned("newSanction");
         assertEquals("newSanction", business.getSanctioned());
     }
+
+    @Test
+    void testToString(){
+        assertEquals("{id: id}\n{name: name}\n{category: category}\n{sanctioned: sanctioned}", business.toString());
+    }
 }
