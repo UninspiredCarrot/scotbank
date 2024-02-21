@@ -18,10 +18,7 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 @Path("/bank")
 public class AppController {
@@ -125,5 +122,22 @@ public class AppController {
 
         return new ModelAndView("view_transaction.hbs", model);
 
+    }
+
+    @GET("/view_all_transactions")
+    public ModelAndView view_all_transactions() {
+        Map<String, Object> model = new HashMap<>();
+        ArrayList<Transaction> transactions;
+
+        try {
+            transactions = this.db.getAllTransactions();
+        } catch (SQLException e) {
+            logger.error("Database Error Occurred",e);
+            throw new StatusCodeException(StatusCode.SERVER_ERROR, "Database Error Occurred");
+        }
+
+        model.put("Transaction", transactions);
+
+        return new ModelAndView("view_all_transaction.hbs", model);
     }
 }
