@@ -229,18 +229,15 @@ public class DatabaseUtil extends Jooby {
     }
 
     public static ArrayList<Business> getBusinessesFromAPI() throws CsvValidationException, IOException {
-        // Make a GET request to the API endpoint that returns a CSV file
         HttpResponse<String> response = Unirest.get("https://api.asep-strath.co.uk/api/businesses").asString();
         String csvContent = response.getBody();
-//
-//            // Parse the CSV content using OpenCSV
+
         CSVReader csvReader = new CSVReader(new StringReader(csvContent));
         String[] nextRecord;
-        // Skip the header row
+
         csvReader.readNext();
         ArrayList<Business> businesses = new ArrayList<>();
         while ((nextRecord = csvReader.readNext()) != null) {
-            // Process each CSV record
             String id = nextRecord[0];
             String name = nextRecord[1];
             String category = nextRecord[2];
@@ -250,9 +247,6 @@ public class DatabaseUtil extends Jooby {
         }
         return businesses;
     }
-
-
-
 
     // Create User Entity.
 
