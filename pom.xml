@@ -28,10 +28,6 @@
             <groupId>io.jooby</groupId>
             <artifactId>jooby-netty</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.opencsv</groupId>
-            <artifactId>opencsv</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>ch.qos.logback</groupId>
