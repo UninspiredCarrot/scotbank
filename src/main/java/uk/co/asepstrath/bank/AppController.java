@@ -115,6 +115,24 @@ public class AppController {
 
     }
 
+    
+    @GET("/view_all_transactions")
+    public ModelAndView view_all_transactions() {
+        Map<String, Object> model = new HashMap<>();
+        ArrayList<Transaction> transactions;
+
+        try {
+            transactions = this.db.getAllTransactions();
+        } catch (SQLException e) {
+            logger.error("Database Error Occurred",e);
+            throw new StatusCodeException(StatusCode.SERVER_ERROR, "Database Error Occurred");
+        }
+
+        model.put("Transaction", transactions);
+
+        return new ModelAndView("view_all_transaction.hbs", model);
+    }
+
     @GET("/summary")
     public ModelAndView summary(@QueryParam String id) throws SQLException {
         Map<String, Object> model = new HashMap<>();

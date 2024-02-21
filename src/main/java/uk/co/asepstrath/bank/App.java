@@ -21,6 +21,8 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
+import static org.junit.Assert.*;
+
 public class App extends Jooby {
 
     {
@@ -45,6 +47,7 @@ public class App extends Jooby {
         Logger log = getLog();
 
         DatabaseUtil.createInstance(ds);
+        assertNotNull(DatabaseUtil.getInstance());
 
         mvc(new ExampleController(ds,log));
         mvc(new AppController(log));
@@ -93,60 +96,51 @@ public class App extends Jooby {
             //----Test Databases--
             //--------------------
 
-            /*  "id":"5d85cff3-4792-43fe-9674-173bf7ef5c5c",
-                "name":"Mr. Rickey Upton",
-                "startingBalance":544.04,
-                "roundUpEnabled":false} */
-            System.out.println("-------------------------------------");
-            Account account = db_util.getAccountByID(
-    "25e9b894-c75b-498a-80c6-614942211594"
-            );
-            System.out.println(account);
-            System.out.println("-------------------------------------");
+//            Account account = ;
+            assertNotNull(db_util.getAccountByID("3558201f-3dc1-4898-92ac-7882806c9ab3"));
 
-            /*  <timestamp>2023-04-10 08:43</timestamp>
-                <amount>150.00</amount>
-                <from>25e9b894-c75b-498a-80c6-614942211594</from>
-                <id>50567a98-9ffd-4d53-b75d-4848c4086416</id>
-                <to>SAI</to>
-                <type>PAYMENT</type>    */
-            System.out.println("-------------------------------------");
-            Transaction transaction = db_util.getTransactionByID(
-                "50567a98-9ffd-4d53-b75d-4848c4086416"
-            );
-            System.out.println(transaction);
-            System.out.println("-------------------------------------");
+            assertNotNull(db_util.getTransactionByID("80712de9-8dfc-4cef-be2a-2a0e701c7fac"));
 
             Encryption encryption = new Encryption();
             ArrayList<Account> accounts = new ArrayList<>();
-            accounts.add(account);
+
+            accounts.add(db_util.getAccountByID("3558201f-3dc1-4898-92ac-7882806c9ab3"));
+
             User user = new User();
             user.setName("user");
             user.setAccounts(accounts);
+
             try {
                 user.setPassword(new String(encryption.encrypt("Password!")));
-            } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
-                throw new RuntimeException(e);
+            } catch (NoSuchAlgorithmException e) {
+                log.error("No Such Algorithm Error : " + e);
+            } catch (UnsupportedEncodingException e) {
+                log.error("Unsupported Encoding Error " + e);
             }
+
 
             user.addAccount(new Account(db_util.createTransactionId(), "Jane Doe", 500, false));
 
             db_util.createUserEntity(new User("user1", "was", new ArrayList<>()));
             db_util.createUserEntity(new User("user2", "tes", new ArrayList<>()));
-            if(!db_util.checkUsernameExists(user.getName()))
-                db_util.createUserEntity(user);
-            if(!db_util.checkUsernameExists(user.getName()))
-                db_util.createUserEntity(user);
 
-            ArrayList<Account> accounts_check = db_util.getAllAccounts();
-            ArrayList<Transaction> transactions_check = db_util.getAllTransactions();
-            ArrayList<User> users_check = db_util.getAllUsers();
+
+            if(!db_util.checkUsernameExists(user.getName()))
+                db_util.createUserEntity(user);
+            if(!db_util.checkUsernameExists(user.getName()))
+                db_util.createUserEntity(user);
 
             user.setName("JaneDoe");
             db_util.updateUser(user.getId(), user);
             User user_check_id = db_util.getUserByID(user.getId());
+            assertNotNull(user_check_id);
 
-            System.out.println(user);
+            ArrayList<Account> accounts_check = db_util.getAllAccounts();
+            ArrayList<Transaction> transactions_check = db_util.getAllTransactions();
+            ArrayList<User> users_check = db_util.getAllUsers();
+            assertEquals(100, accounts_check.size());
+            assertEquals(3047, transactions_check.size());
+            assertEquals(100, users_check.size());
 
         } catch (SQLException e) {
             log.error("Database Creation Error",e);
