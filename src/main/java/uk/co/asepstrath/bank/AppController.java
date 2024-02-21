@@ -1,5 +1,7 @@
 package uk.co.asepstrath.bank;
 
+import ch.qos.logback.core.model.Model;
+import io.jooby.Context;
 import io.jooby.ModelAndView;
 import io.jooby.StatusCode;
 import io.jooby.annotation.*;
@@ -7,14 +9,20 @@ import io.jooby.exception.StatusCodeException;
 import org.slf4j.Logger;
 
 import java.io.UnsupportedEncodingException;
+import java.net.http.HttpClient;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.*;
 
 @Path("/bank")
 public class AppController {
+
     private final Logger logger;
     private final DatabaseUtil db;
+    User ACTIVEUSER = null;
+
+
+
     /*
     This constructor can take in any dependencies the controller may need to respond to a request
      */
@@ -48,19 +56,23 @@ public class AppController {
     }
 
     @GET("/login")
-    public ModelAndView login() {
-        // we must create a model to pass to the "login" template
+    public ModelAndView login(Context context) {
+
+        if(ACTIVEUSER!=null)
+            context.sendRedirect("/bank/logout");
 
         return new ModelAndView("login.hbs", new HashMap<>());
     }
 
     @POST("/login")
-    public String loginPost(String username, String password) {
+    public void loginPost(Context ctx) {
         // we must create a model to pass to the "login" template
         Encryption encryption = new Encryption();
         DatabaseUtil connection = DatabaseUtil.getInstance();
         boolean username_match = false, password_match = false;
         User user = null;
+        String username = ctx.form("username").value();
+        String password = ctx.form("password").value();
 
         try {
             username_match = connection.checkUsernameExists(username);
@@ -80,10 +92,26 @@ public class AppController {
         } catch (SQLException e){
             logger.error("SQL Exception :" + e);
         }
-        if(user == null)
-            return "LOGIN FAIL";
-        else
-            return "LOGIN SUCCESS";
+
+        if(user == null){
+            ctx.sendRedirect("/bank/login");
+        }
+        else {
+            ACTIVEUSER = user;
+            ctx.sendRedirect("/bank");
+
+        }
+    }
+
+    @GET("/logout")
+    public ModelAndView logout(Context context){
+        return new ModelAndView("logout.hbs", new HashMap<>());
+    }
+
+    @POST("/logout")
+    public void logoutPost(Context context){
+        this.ACTIVEUSER = null;
+        context.sendRedirect("/bank/login");
     }
 
     @GET("/view_transaction")
