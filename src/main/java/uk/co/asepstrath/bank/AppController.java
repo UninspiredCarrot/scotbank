@@ -1,22 +1,13 @@
 package uk.co.asepstrath.bank;
 
-import ch.qos.logback.core.model.Model;
 import io.jooby.ModelAndView;
-import io.jooby.Router;
 import io.jooby.StatusCode;
 import io.jooby.annotation.*;
 import io.jooby.exception.StatusCodeException;
-import kong.unirest.core.HttpResponse;
-import kong.unirest.core.JsonNode;
-import kong.unirest.core.Unirest;
 import org.slf4j.Logger;
 
-import javax.sql.DataSource;
-import java.awt.print.Book;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
-import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -124,6 +115,7 @@ public class AppController {
 
     }
 
+    
     @GET("/view_all_transactions")
     public ModelAndView view_all_transactions() {
         Map<String, Object> model = new HashMap<>();
@@ -139,5 +131,37 @@ public class AppController {
         model.put("Transaction", transactions);
 
         return new ModelAndView("view_all_transaction.hbs", model);
+    }
+
+    @GET("/summary")
+    public ModelAndView summary(@QueryParam String id) throws SQLException {
+        Map<String, Object> model = new HashMap<>();
+        ArrayList<Transaction> transactions;
+
+        try {
+            transactions = db.getTransactionsByAccount(id);
+        } catch (SQLException e) {
+            logger.error("Transactions Database Error Occurred",e);
+            throw new StatusCodeException(StatusCode.SERVER_ERROR, "Transactions Database Error Occurred");
+        }
+
+        HashMap<String, Double> categoriesToTotals = new HashMap<>();
+        for (Transaction transaction:transactions){
+            if (Objects.equals(transaction.getTransaction_type(), "PAYMENT")) {
+                List<String> categoryList = Arrays.asList(db.getBusinessFromID(transaction.getTo()).getCategory().split(" "));
+                categoryList.remove("&");
+                String category = String.join("", categoryList);
+                double amount = transaction.getAmount();;
+                if (categoriesToTotals.containsKey(category)) {
+                    amount += categoriesToTotals.get(category);
+                }
+                categoriesToTotals.put(category, amount);
+            }
+        }
+
+        for (String key: categoriesToTotals.keySet()) {
+            model.put(key + "Total", categoriesToTotals.get(key));
+        }
+        return new ModelAndView("summary.hbs", model);
     }
 }

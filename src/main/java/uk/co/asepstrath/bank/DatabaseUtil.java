@@ -1,5 +1,7 @@
 package uk.co.asepstrath.bank;
 
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvValidationException;
 import io.jooby.Jooby;
 import kong.unirest.core.GenericType;
 import kong.unirest.core.HttpResponse;
@@ -15,6 +17,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
+import java.io.StringReader;
 import java.net.URL;
 import java.sql.*;
 import java.util.ArrayList;
@@ -87,13 +90,27 @@ public class DatabaseUtil extends Jooby {
         stmt.close();
         //---------------------------------------------------------------------------------------
 
+        //------------create businesses table----------------------------------------------------
+        stmt = connection.createStatement();
+        stmt.executeUpdate(
+                "CREATE TABLE IF NOT EXISTS`businesses` (" +
+                        "id VARCHAR(255) PRIMARY KEY,"+
+                        "`name` VARCHAR(255) NOT NULL,"+
+                        "`category` VARCHAR(255) NOT NULL," +
+                        "`sanctioned` VARCHAR(255) NOT NULL,"+
+                        "PRIMARY KEY (id)"+
+                        ")"
+        );
+        stmt.close();
+        //---------------------------------------------------------------------------------------
+
     }
 
     public static void createInstance(DataSource dataSource){
         if(db_util == null) db_util = new DatabaseUtil();
         ds=dataSource;
     }
-    public static void fetchDataFromAPI() throws SQLException, ParserConfigurationException, IOException, SAXException {
+    public static void fetchDataFromAPI() throws SQLException, ParserConfigurationException, IOException, SAXException, CsvValidationException {
         //----------------read accounts from the account api-------------------------------------
         HttpResponse<List<Account>> accountResponse =
                 Unirest
@@ -204,14 +221,38 @@ public class DatabaseUtil extends Jooby {
             }
             db_util.createTransactionEntitiesFromList(transactions);
             p++;
+<<<<<<< bbe84dd8295d6adf3c124be85a311ca9c93516f1
+        }*/
+
+
+        db_util.createBusinessEntitiesFromList(getBusinessesFromAPI());
+=======
         }
+>>>>>>> d673a0ed411e1e631bddeee748aac6bc507e3370
     }
     public static DatabaseUtil getInstance(){
         return db_util;
     }
 
+    public static ArrayList<Business> getBusinessesFromAPI() throws CsvValidationException, IOException {
+        HttpResponse<String> response = Unirest.get("https://api.asep-strath.co.uk/api/businesses").asString();
+        String csvContent = response.getBody();
 
+        CSVReader csvReader = new CSVReader(new StringReader(csvContent));
+        String[] nextRecord;
 
+        csvReader.readNext();
+        ArrayList<Business> businesses = new ArrayList<>();
+        while ((nextRecord = csvReader.readNext()) != null) {
+            String id = nextRecord[0];
+            String name = nextRecord[1];
+            String category = nextRecord[2];
+            String sanctioned = nextRecord[3];
+
+            businesses.add(new Business(id, name, category, sanctioned));
+        }
+        return businesses;
+    }
 
     // Create User Entity.
 
@@ -378,6 +419,26 @@ public class DatabaseUtil extends Jooby {
             prep.setString(4, transaction.getFrom());
             prep.setDouble(5, transaction.getAmount());
             prep.setString(6, transaction.getTransaction_type());
+
+            prep.executeUpdate();
+
+            prep.close();
+        }
+        con.close();
+    }
+    public void createBusinessEntitiesFromList(ArrayList<Business> businesses) throws SQLException{
+        Connection con = ds.getConnection();
+        for(Business business : businesses) {
+            PreparedStatement prep = con.prepareStatement(
+                    "INSERT INTO `businesses` (" +
+                            "id, `name`, `category`, `sanctioned`" +
+                            ") VALUES (?,?,?,?);"
+            );
+
+            prep.setString(1, business.getId());
+            prep.setString(2, business.getName());
+            prep.setString(3, business.getCategory());
+            prep.setString(4, business.getSanctioned());
 
             prep.executeUpdate();
 
@@ -740,5 +801,45 @@ public class DatabaseUtil extends Jooby {
         con.close();
 
         return transaction;
+    }
+
+    public ArrayList<Business> getAllBusinesses() throws SQLException{
+        ArrayList<Business> businesses = new ArrayList<>();
+
+        Connection con = ds.getConnection();
+        Statement stmt = con.createStatement();
+        ResultSet rs = stmt.executeQuery(
+                "SELECT * FROM businesses"
+        );
+        while(rs.next())
+        {
+            Business business = new Business();
+            business.setId(rs.getString("id"));
+            business.setCategory(rs.getString("category"));
+            business.setName(rs.getString("name"));
+            business.setSanctioned(rs.getString("sanctioned"));
+            businesses.add(business);
+        }
+
+        stmt.close();
+        rs.close();
+        con.close();
+
+        return businesses;
+    }
+
+    public Business getBusinessFromID(String id) throws SQLException{
+        Connection con = ds.getConnection();
+        Statement stmt = con.createStatement();
+        ResultSet rs = stmt.executeQuery(
+                "SELECT * FROM `businesses` WHERE `id` = \'"+id+"\'"
+        );
+        rs.next();
+        Business business = new Business();
+        business.setId(rs.getString("id"));
+        business.setCategory(rs.getString("category"));
+        business.setName(rs.getString("name"));
+        business.setSanctioned(rs.getString("sanctioned"));
+        return business;
     }
 }

@@ -1,5 +1,9 @@
 package uk.co.asepstrath.bank;
 
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvValidationException;
+import kong.unirest.core.HttpResponse;
+import kong.unirest.core.Unirest;
 import org.xml.sax.SAXException;
 import uk.co.asepstrath.bank.example.ExampleController;
 import io.jooby.Jooby;
@@ -11,6 +15,7 @@ import org.slf4j.Logger;
 import javax.sql.DataSource;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
@@ -62,7 +67,7 @@ public class App extends Jooby {
     This function will be called when the application starts up,
     it should be used to ensure that the DB is properly setup
      */
-    public void onStart() {
+    public void onStart() throws CsvValidationException, SQLException, IOException {
         Logger log = getLog();
         log.info("Starting Up...");
 
@@ -140,6 +145,9 @@ public class App extends Jooby {
         } catch (SQLException e) {
             log.error("Database Creation Error",e);
         }
+
+
+//        System.out.println(db_util.getAllBusinesses());
     }
 
     /*
