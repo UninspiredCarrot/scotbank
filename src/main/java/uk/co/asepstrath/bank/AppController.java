@@ -105,7 +105,9 @@ public class AppController {
 
     @GET("/logout")
     public ModelAndView logout(Context context){
+
         return new ModelAndView("logout.hbs", new HashMap<>());
+
     }
 
     @POST("/logout")
