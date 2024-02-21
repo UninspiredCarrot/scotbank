@@ -1,6 +1,5 @@
 package uk.co.asepstrath.bank;
 
-import ch.qos.logback.core.model.Model;
 import io.jooby.Context;
 import io.jooby.ModelAndView;
 import io.jooby.StatusCode;
@@ -9,7 +8,6 @@ import io.jooby.exception.StatusCodeException;
 import org.slf4j.Logger;
 
 import java.io.UnsupportedEncodingException;
-import java.net.http.HttpClient;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.*;
@@ -86,7 +84,6 @@ public class AppController {
             if(username_match && password_match){
                 user = connection.getUserByUsername(username);
             }
-
         } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
             logger.error("Encryption Error :" + e);
         } catch (SQLException e){
@@ -99,7 +96,6 @@ public class AppController {
         else {
             ACTIVEUSER = user;
             ctx.sendRedirect("/bank");
-
         }
     }
 

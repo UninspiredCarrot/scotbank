@@ -1,9 +1,6 @@
 package uk.co.asepstrath.bank;
 
-import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
-import kong.unirest.core.HttpResponse;
-import kong.unirest.core.Unirest;
 import org.xml.sax.SAXException;
 import uk.co.asepstrath.bank.example.ExampleController;
 import io.jooby.Jooby;
@@ -15,7 +12,6 @@ import org.slf4j.Logger;
 import javax.sql.DataSource;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
-import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
